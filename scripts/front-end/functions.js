@@ -7,9 +7,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			e.preventDefault();
 			var id = $(this).attr("id");
 			if(id == "source") {
-				console.log("here");
-				window.open("https://github.com/nathanmarianovsky/" +
-					"UCSC-Personal/tree/Billiard-Dynamics", "_blank");
+				window.open("https://github.com/nathanmarianovsky/Billiard-Dynamics", "_blank");
 			}
 			else if(id == "home") {
 				router.navigate("def");
