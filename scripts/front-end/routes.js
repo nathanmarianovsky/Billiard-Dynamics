@@ -98,13 +98,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 					else if(num == 6) {
 						str += "$a = 1$ (horizontal stretch of the ellipse)," +
 							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = \\infty$ (strength of the inner magnetic field)," +
-							" $B_2 = -3$ (strength of the outer magnetic field)," + 
+							" $B_1 = 1$ (strength of the inner magnetic field)," +
+							" $B_2 = 0$ (strength of the outer magnetic field)," + 
 							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
 							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 0$ (initial velocity" +
+							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
 							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 130^\\circ$ (initial angle for position" +
+							" and $\\theta = 70^\\circ$ (initial angle for position" +
 							" along the ellipse)."
 					}
 					else if(num == 7) {
@@ -216,6 +216,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 				$("main").append(intro);
 				$.get("/client/main.html").done(function(result) {
 					$("main").append(result);
+					$(".indicator").hide();
 					functions.messageHandler(1);
 					$("#myDiv").remove();
 					var myDiv = $("<div>").attr("id", "myDiv").css({
@@ -328,7 +329,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							}
 						}
 						else if(i == 0) {
-							var check = functions.evaluateTrajectoryStep(math.pow(10, -4),
+							var check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 								point.x, point.y, point.v_x, point.v_y);
 							if(functions.checkRegion(check, a, b, math) == 0) {
 								point.v_x *= -1;

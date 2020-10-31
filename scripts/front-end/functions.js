@@ -249,34 +249,34 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				iterX.push(pointIter.x);
 				iterY.push(pointIter.y);
 			}
-			if(pointIter.y <= -(max + scale) || pointIter.y >= max + scale) {
-				pointIter.y = pointIter.y * -1;
-				pointIter.x += (2 * pointIter.y * (pointIter.v_x / pointIter.v_y));
-				if(pointIter.x < -(max + scale)) {
-					while(pointIter.x < -(max + scale)) { pointIter.x += math.pow(10, -3); }
-				}
-				else if(pointIter.x > max + scale) { pointIter.x -= math.pow(10, -3); }
-			}
-			else if(pointIter.x <= -(max + scale) || pointIter.x >= max + scale) {
-				pointIter.x *= -1;
-				pointIter.y += (2 * pointIter.x * (pointIter.v_y / pointIter.v_x));
-				if(pointIter.y < -(max + scale)) {
-					while(pointIter.y < -(max + scale)) { pointIter.y += math.pow(10, -3); }
-				}
-				else if(pointIter.y > max + scale) { pointIter.y -= math.pow(10, -3); }
-			}
+			pointIter = exports.evaluateTrajectory(point.x, point.y, -point.v_x, -point.v_y,
+				xLength, yLength);
+			point = pointIter;
 			iterX.push(null);
 			iterY.push(null);
 			iterX.push(pointIter.x);
 			iterY.push(pointIter.y);
-			while(exports.checkRegion(pointIter, xLength, yLength, math) == 1) {
+			while((-(max + scale) <= pointIter.x) && (pointIter.x <= max + scale)
+				&& (-(max + scale) <= pointIter.y) && (pointIter.y <= max + scale)) {
 				pointIter = exports.evaluateTrajectoryStep(math.pow(10, -4),
 					pointIter.x, pointIter.y, pointIter.v_x, pointIter.v_y);
 				iterX.push(pointIter.x);
 				iterY.push(pointIter.y);
 			}
-			point = pointIter;
+			if(innerMagneticField == Infinity) {
+				point = exports.reflectTrajectory(point.x, point.y,
+					-point.v_x, -point.v_y, xLength, yLength);
+			}
+			else {
+				check = exports.evaluateTrajectoryStep(math.pow(10, -2),
+					point.x, point.y, point.v_x, point.v_y);
+				if(exports.checkRegion(check, xLength, yLength, math) == 1) {
+					point.v_x *= -1;
+					point.v_y *= -1;
+				}
+			}
 		}
+		// console.log(point);
 		return point;
 	};
 
@@ -328,9 +328,25 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			point = exports.reflectTrajectory(point.x, point.y,
 				point.v_x, point.v_y, xLength, yLength);
 		}
+		else if(outerMagneticField != Infinity && ver == 0) {
+			check = exports.evaluateTrajectoryStep(math.pow(10, -2),
+				point.x, point.y, point.v_x, point.v_y);
+			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
+				point.v_x *= -1;
+				point.v_y *= -1;
+			}
+		}
 		if(innerMagneticField == Infinity && ver == 1) {
 			point = exports.reflectTrajectory(point.x, point.y,
 				point.v_x, point.v_y, xLength, yLength);
+		}
+		else if(innerMagneticField != Infinity && ver == 1) {
+			check = exports.evaluateTrajectoryStep(math.pow(10, -2),
+				point.x, point.y, point.v_x, point.v_y);
+			if(exports.checkRegion(check, xLength, yLength, math) == 1) {
+				point.v_x *= -1;
+				point.v_y *= -1;
+			}
 		}
 		return point;
 	};
