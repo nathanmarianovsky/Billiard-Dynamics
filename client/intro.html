@@ -8,18 +8,23 @@
         <tbody>
         	<tr>
             	<td>
-            		This website serves to provide vivid visualizations tied to the dynamics of billiards associated to an ellipse in the plane. Formally the goal is to study the trajectories an electron (or a billiard ball) traverses with different initial conditions (the position and velocity) and varying strengths of the magnetic field(s). By setting 
+            		This website serves to provide vivid visualizations tied to the dynamics of billiards associated to an ellipse in the plane. Formally the goal is to study the trajectories a particle (or a billiard ball) traverses with different initial conditions (the position and velocity) and varying strengths of the magnetic field(s). By setting:
             		<div class="latex_equation">
             			$\Omega = \Big\{ (x,y) \in \mathbb{R}^2 \hspace{.1cm} \Big| \hspace{.1cm} \frac{x^2}{a^2} + \frac{y^2}{b^2} < 1 \Big\} \subset \mathbb{R}^2 \hspace{.3cm} \text{with} \hspace{.3cm} a,b \in \mathbb{R}$
             		</div>
-            		and introducing the magnetic fields:
+            		to represent the interior of the ellipse and introducing the magnetic fields:
             		<div class="latex_equation">
             			$\mathbf{B} = B_\Omega(\mathbf{x})\mathbf{\hat{k}} \hspace{.3cm} \text{where} \hspace{.3cm} B_\Omega(q) = \begin{cases} B_1, & \mathbf{x} \in \Omega \\ B_2, & \mathbf{x} \in \mathbb{R}^2 \setminus \Omega \end{cases} \hspace{.3cm} \text{with} \hspace{.3cm} B_1, B_2 \in \mathbb{R}$
             		</div>
-            		we can conclude under classical mechanics that with mass $m > 0$ and charge $q > 0$ (where the sign has already been incorporated) the electron must satisfy the following law of motion govered by the Lorentz force (with no electric field):
+            		we can conclude under classical mechanics that with mass $m > 0$ and charge $q > 0$ (where the sign has already been incorporated) the particle must satisfy the following law of motion govered by the Lorentz force (with no electric field):
             		<div class="latex_equation">
             			$\mathbf{\ddot{x}} = \begin{cases} \frac{qB_1}{m}\mathbb{J}\mathbf{\dot{x}}, & \mathbf{x} \in \Omega \\ \frac{qB_2}{m}\mathbb{J}\mathbf{\dot{x}}, & \mathbf{x} \in \mathbb{R}^2 \setminus \Omega \end{cases} \hspace{.3cm} \text{where} \hspace{.3cm} \mathbb{J} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$
             		</div>
+                    Now by parametrizing the ellipse $\partial\Omega$ via:
+                    <div class="latex_equation">
+                        $\mathbf{r}: [0,2\pi] \rightarrow \partial\Omega \hspace{.3cm} \text{given by} \hspace{.3cm} \mathbf{r}(\theta) = (a\cos(\theta),b\sin(\theta))$
+                    </div>
+                    we see that the necessary data to plot a trajectory in our system consists of $a$ (the horizontal axis of the ellipse), $b$ (the vertical axis of the ellipse), $\theta$ (starting point prescribed by an angle), $\mathbf{\dot{x}}(0)$ (initial velocity with two components), $B_1$ (strength of the inner magnetic field), $B_2$ (strength of the outer magnetic field), and the number of iterations. 
             	</td>
           	</tr>
         </tbody>

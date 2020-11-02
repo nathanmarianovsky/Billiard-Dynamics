@@ -48,7 +48,8 @@ define(["jquery", "app/functions"], ($, functions) => {
 				$.get("/client/example.html").done(function(result) {
 					$("main").append(result);
 					functions.messageHandler(0);
-					$("#intro table tbody tr").hide();
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
+					$("#intro > table > tbody > tr").hide();
 					var str = "All of the following visualizations are associated" +
 						" to the scenario where:",
 						info = $("<div>").addClass("latex_equation"),
@@ -136,7 +137,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 						$("main").append(bdy);
 					}
 
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					functions.handle_links(router);
 				});
 			});
@@ -267,8 +267,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 									outerMagneticField, 0);
 							}
 						}
-						// console.log("inner");
-						// console.log(point);
 
 						// Outer Dynamics
 						if(outerMagneticField != Infinity) {
@@ -289,9 +287,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 									outerMagneticField, scaleFactor, 1);
 							}
 						}
-						// console.log("outer");
-						// console.log(point);
-						// console.log(i);
 					}
 
 					// Plotting Data
