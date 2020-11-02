@@ -4,15 +4,14 @@ define(["jquery", "app/functions"], ($, functions) => {
 	// Adds all necessary front-end listeners
 	exports.add_listeners = (router, Plotly, math, Materialize) => {
 
-		// Default route is designed to simply be a data collector
+		// Default route is designed to introduce all the necessary details
 		router.addRouteListener("def", (toState, fromState) => {
 			$("main").empty();
 			$.get("/client/intro.html").done(function(intro) {
 				$("main").append(intro);
-				$.get("/client/main.html").done(function(result) {
-					$("main").append(result);
-					$(".indicator").hide();
-					$("#myDiv").empty();
+				$(".indicator").hide();
+				$.get("/client/cases.html").done(function(cases) {
+					$("main").append(cases);
 					$("select").material_select();
 					Materialize.updateTextFields();
 					functions.handle_links(router);
@@ -22,7 +21,24 @@ define(["jquery", "app/functions"], ($, functions) => {
 			});
 		});
 
+		// This route is meant to simply be a collector of initial conditions
+		router.addRouteListener("config", (toState, fromState) => {
+			$("main").empty();
+			$.get("/client/intro.html").done(function(intro) {
+				$("main").append(intro);
+				$(".indicator").hide();
+				$.get("/client/main.html").done(function(main) {
+					$("main").append(main);
+					$("select").material_select();
+					Materialize.updateTextFields();
+					functions.handle_links(router);
+					functions.messageHandler(0);
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
+				});
+			});
+		});
 
+		// This route displays the preset examples
 		router.addRouteListener("example", (toState, fromState) => {
 			var num = parseInt(toState.params.num);
 			$("main").empty();
@@ -34,128 +50,56 @@ define(["jquery", "app/functions"], ($, functions) => {
 					functions.messageHandler(0);
 					$("#intro table tbody tr").hide();
 					var str = "All of the following visualizations are associated" +
-						" to the scenario where ";
+						" to the scenario where:",
+						info = $("<div>").addClass("latex_equation"),
+						a = 0, b = 0, B1 = 0, B2 = 0, v1 = 0, v_2 = 0, ang = 0;
 					if(num == 1) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 0$ (strength of the inner magnetic field)," +
-							" $B_2 = 1$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 40^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "0"; B2 = "1";
+						v1 = "-1"; v2 = "-1"; ang = "40";
 					}
 					else if(num == 2) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = -2$ (strength of the inner magnetic field)," +
-							" $B_2 = 0$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 80^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "-2"; B2 = "0";
+						v1 = "-1"; v2 = "-1"; ang = "80";
 					}
 					else if(num == 3) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 1.5$ (strength of the inner magnetic field)," +
-							" $B_2 = \\infty$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 80^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "1.5"; B2 = "\\infty";
+						v1 = "-1"; v2 = "-1"; ang = "80";
 					}
 					else if(num == 4) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 3$ (strength of the inner magnetic field)," +
-							" $B_2 = 0.5$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 0$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 0^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "3"; B2 = "0.5";
+						v1 = "-1"; v2 = "0"; ang = "0";
 					}
 					else if(num == 5) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = \\infty$ (strength of the inner magnetic field)," +
-							" $B_2 = 0.5$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 70^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "\\infty"; B2 = "0.5";
+						v1 = "-1"; v2 = "1"; ang = "70";
 					}
 					else if(num == 6) {
-						str += "$a = 1$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 1$ (strength of the inner magnetic field)," +
-							" $B_2 = 0$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 70^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "1"; b = "1"; B1 = "1"; B2 = "0";
+						v1 = "-1"; v2 = "-1"; ang = "70";
 					}
 					else if(num == 7) {
-						str += "$a = 2$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 0$ (strength of the inner magnetic field)," +
-							" $B_2 = \\infty$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 2$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 160^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "2"; b = "1"; B1 = "0"; B2 = "\\infty";
+						v1 = "-1"; v2 = "2"; ang = "160";
 					}
 					else if(num == 8) {
-						str += "$a = 2$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 1$ (strength of the inner magnetic field)," +
-							" $B_2 = \\infty$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 3$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 140^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "2"; b = "1"; B1 = "1"; B2 = "\\infty";
+						v1 = "-1"; v2 = "3"; ang = "140";
 					}
 					else if(num == 9) {
-						str += "$a = 3$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = \\infty$ (strength of the inner magnetic field)," +
-							" $B_2 = -1$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 70^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "3"; b = "1"; B1 = "\\infty"; B2 = "-1";
+						v1 = "-1"; v2 = "1"; ang = "70";
 					}
 					else if(num == 10) {
-						str += "$a = 3$ (horizontal stretch of the ellipse)," +
-							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 4$ (strength of the inner magnetic field)," +
-							" $B_2 = 0$ (strength of the outer magnetic field)," + 
-							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
-							" of electron in the $x_1$ direction)," +
-							" $\\mathbf{\\dot{x}}_{20} = 1$ (initial velocity" +
-							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 100^\\circ$ (initial angle for position" +
-							" along the ellipse)."
+						a = "3"; b = "1"; B1 = "-4"; B2 = "0";
+						v1 = "-1"; v2 = "1"; ang = "90";
 					}
-					$("#fill").append(str);
+					info.append("$a = " + a + ", \\hspace{.3cm} b = " + b +
+							", \\hspace{.3cm} B_1 = " + B1 + ", \\hspace{.3cm} B_2 = " + B2 +
+							", \\hspace{.3cm} \\mathbf{\\dot{x}}_{1}(0) = " + v1 +
+							", \\hspace{.3cm} \\mathbf{\\dot{x}}_{2}(0) = " + v2 +
+							", \\hspace{.3cm} \\text{and} \\hspace{.3cm} \\theta = " +
+							ang + "^\\circ$");
+					$("#fill").append(str, info);
 
 					for(var i = 1; i < 7; i++) {
 						var prepare = "/client/img/example" + num + "/example" +
@@ -198,17 +142,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 			});
 		});
 
-
-
-
-
-
-
-
-
-
-
-
 		// This route takes in initial conditions and provides a visual of the trajectory
 		router.addRouteListener("mod", (toState, fromState) => {
 			$("main").empty();
@@ -216,6 +149,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 				$("main").append(intro);
 				$.get("/client/main.html").done(function(result) {
 					$("main").append(result);
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					$(".indicator").hide();
 					functions.messageHandler(1);
 					$("#myDiv").remove();
@@ -237,7 +171,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 					myDiv.append(wrapper);
 					$("main").append(myDiv);
 					$("select").material_select();
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 
 					// Initial Conditions
 					var innerMagneticField = 0,
@@ -317,6 +250,12 @@ define(["jquery", "app/functions"], ($, functions) => {
 					for(var i = 0; i < parseInt(toState.params.iter); i++) {
 						// Inner Dynamics
 						if(innerMagneticField != Infinity) {
+							check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+								point.x, point.y, point.v_x, point.v_y);
+							if(functions.checkRegion(check, a, b, math) == 1) {
+								point.v_x *= -1;
+								point.v_y *= -1;
+							}
 							if(innerMagneticField == 0) {
 								point = functions.plotting(point, math, a, b,
 									iterX, iterY, innerMagneticField,
@@ -328,17 +267,17 @@ define(["jquery", "app/functions"], ($, functions) => {
 									outerMagneticField, 0);
 							}
 						}
-						else if(i == 0) {
-							var check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+						// console.log("inner");
+						// console.log(point);
+
+						// Outer Dynamics
+						if(outerMagneticField != Infinity) {
+							check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 								point.x, point.y, point.v_x, point.v_y);
 							if(functions.checkRegion(check, a, b, math) == 0) {
 								point.v_x *= -1;
 								point.v_y *= -1;
 							}
-						}
-
-						// Outer Dynamics
-						if(outerMagneticField != Infinity) {
 							if(outerMagneticField != 0) {
 								point = functions.magneticPlotting(point, math, a, b,
 									iterX, iterY, outerScaling, innerMagneticField,
@@ -350,6 +289,9 @@ define(["jquery", "app/functions"], ($, functions) => {
 									outerMagneticField, scaleFactor, 1);
 							}
 						}
+						// console.log("outer");
+						// console.log(point);
+						// console.log(i);
 					}
 
 					// Plotting Data

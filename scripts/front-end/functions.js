@@ -17,6 +17,9 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				$("#innerInf").attr("checked", false);
 				$("#outerInf").attr("checked", false);
 			}
+			else if(id == "configuration") {
+				router.navigate("config");
+			}
 			else if(id.split("example")[0] == "") {
 				router.navigate("example", {num: id.split("example")[1]});
 			}
@@ -292,16 +295,27 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 		// Keep count of the number of steps to break out when necessary
 		var steps = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3);
+			index = math.pow(10, -3.8);
 
 		// A point used to determine whether traveling in positive time lands in the exterior or interior of a region
-		var check = exports.evaluateMagneticTrajectory(index,
-			coefficientList[0], coefficientList[1], coefficientList[2],
-			coefficientList[3], scaling);
+		var check1 = exports.evaluateMagneticTrajectory(index,
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling),
+			check2 = exports.evaluateMagneticTrajectory(10 * index,
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling),
+			check3 = exports.evaluateMagneticTrajectory(index / 10,
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling);
 
 		// Evaluate outer trajectory and add to the list
-		if(exports.checkRegion(check, xLength, yLength, math) == ver) {
-			point = check;
+		var result1 = exports.checkRegion(check1, xLength, yLength, math) == ver ? 1 : 0,
+			result2 = exports.checkRegion(check2, xLength, yLength, math) == ver ? 1 : 0,
+			result3 = exports.checkRegion(check3, xLength, yLength, math) == ver ? 1 : 0;
+		var val = exports.checker(result1, result2, result3);
+
+		if(val) {
+			point = check1;
 			while(exports.checkRegion(point, xLength, yLength, math) == ver) {
 				if(steps >= bound) { break; }
 				else { steps++; }
@@ -327,27 +341,22 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			point = exports.reflectTrajectory(point.x, point.y,
 				point.v_x, point.v_y, xLength, yLength);
 		}
-		else if(outerMagneticField != Infinity && ver == 0) {
-			check = exports.evaluateTrajectoryStep(math.pow(10, -2),
-				point.x, point.y, point.v_x, point.v_y);
-			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
-				point.v_x *= -1;
-				point.v_y *= -1;
-			}
-		}
 		if(innerMagneticField == Infinity && ver == 1) {
 			point = exports.reflectTrajectory(point.x, point.y,
 				point.v_x, point.v_y, xLength, yLength);
 		}
-		else if(innerMagneticField != Infinity && ver == 1) {
-			check = exports.evaluateTrajectoryStep(math.pow(10, -2),
-				point.x, point.y, point.v_x, point.v_y);
-			if(exports.checkRegion(check, xLength, yLength, math) == 1) {
-				point.v_x *= -1;
-				point.v_y *= -1;
-			}
-		}
 		return point;
+	};
+
+
+	// Tells whether at least two of the given values are true (or equal to 1)
+	exports.checker = function(bool1, bool2, bool3) {
+		var hold = 0;
+		if((bool1 == 1 && bool2 == 1) || (bool1 == 1 && bool3 == 1) ||
+			(bool2 == 1 && bool3 == 1)) {
+			hold = 1;
+		}
+		return hold;
 	};
 
 	return exports;
