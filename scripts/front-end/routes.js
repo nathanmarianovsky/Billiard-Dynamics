@@ -7,6 +7,18 @@ define(["jquery", "app/functions"], ($, functions) => {
 		// Default route is designed to introduce all the necessary details
 		router.addRouteListener("def", (toState, fromState) => {
 			$("main").empty();
+			$("#configuration").css({
+				"cursor": "pointer",
+				"color": "white"
+			});
+			$("#configuration").parent().removeClass("active");
+			$("#home").on("click", function(event) {
+				event.preventDefault();
+			}).css({
+				"cursor": "inherit",
+				"color": "#EDCF40"
+			});
+			$("#home").parent().addClass("active");
 			$.get("/client/intro.html").done(function(intro) {
 				$("main").append(intro);
 				$(".indicator").hide();
@@ -24,6 +36,18 @@ define(["jquery", "app/functions"], ($, functions) => {
 		// This route is meant to simply be a collector of initial conditions
 		router.addRouteListener("config", (toState, fromState) => {
 			$("main").empty();
+			$("#home").css({
+				"cursor": "pointer",
+				"color": "white"
+			});
+			$("#home").parent().removeClass("active");
+			$("#configuration").on("click", function(event) {
+				event.preventDefault();
+			}).css({
+				"cursor": "inherit",
+				"color": "#EDCF40"
+			});
+			$("#configuration").parent().addClass("active");
 			$.get("/client/intro.html").done(function(intro) {
 				$("main").append(intro);
 				$(".indicator").hide();
@@ -42,13 +66,24 @@ define(["jquery", "app/functions"], ($, functions) => {
 		router.addRouteListener("example", (toState, fromState) => {
 			var num = parseInt(toState.params.num);
 			$("main").empty();
+			$("#home").css({
+				"cursor": "pointer",
+				"color": "white"
+			});
+			$("#home").parent().removeClass("active");
+			$("#configuration").css({
+				"cursor": "pointer",
+				"color": "white"
+			});
+			$("#configuration").parent().removeClass("active");
+			$("#home").parent().removeClass("active");
+			$("#home").parent().removeClass("active");
 			$(".indicator").show();
 			$.get("/client/intro.html").done(function(intro) {
 				$("main").append(intro);
 				$.get("/client/example.html").done(function(result) {
 					$("main").append(result);
 					functions.messageHandler(0);
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					$("#intro > table > tbody > tr").hide();
 					var str = "All of the following visualizations are associated" +
 						" to the scenario where:",
@@ -136,7 +171,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							});
 						$("main").append(bdy);
 					}
-
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					functions.handle_links(router);
 				});
 			});
