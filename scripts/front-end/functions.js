@@ -276,7 +276,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				}
 			}
 		}
-		// console.log(point);
 		return point;
 	};
 

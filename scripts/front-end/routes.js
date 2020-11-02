@@ -50,13 +50,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 					else if(num == 2) {
 						str += "$a = 1$ (horizontal stretch of the ellipse)," +
 							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = 1$ (strength of the inner magnetic field)," +
+							" $B_1 = -2$ (strength of the inner magnetic field)," +
 							" $B_2 = 0$ (strength of the outer magnetic field)," + 
 							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
 							" of electron in the $x_1$ direction)," +
 							" $\\mathbf{\\dot{x}}_{20} = -1$ (initial velocity" +
 							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 45^\\circ$ (initial angle for position" +
+							" and $\\theta = 80^\\circ$ (initial angle for position" +
 							" along the ellipse)."
 					}
 					else if(num == 3) {
@@ -134,13 +134,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 					else if(num == 9) {
 						str += "$a = 3$ (horizontal stretch of the ellipse)," +
 							" $b = 1$ (vertical stretch of the ellipse," +
-							" $B_1 = -1$ (strength of the inner magnetic field)," +
-							" $B_2 = -2$ (strength of the outer magnetic field)," + 
+							" $B_1 = \\infty$ (strength of the inner magnetic field)," +
+							" $B_2 = -1$ (strength of the outer magnetic field)," + 
 							" $\\mathbf{\\dot{x}}_{10} = -1$ (initial velocity" +
 							" of electron in the $x_1$ direction)," +
 							" $\\mathbf{\\dot{x}}_{20} = 1$ (initial velocity" +
 							" of electron in the $x_2$ direction)," +
-							" and $\\theta = 165^\\circ$ (initial angle for position" +
+							" and $\\theta = 70^\\circ$ (initial angle for position" +
 							" along the ellipse)."
 					}
 					else if(num == 10) {
