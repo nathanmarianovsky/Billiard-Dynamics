@@ -240,6 +240,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 						param = 0,
 						steps = 0,
 						stop = 0,
+						phi = 0,
 						iterX = [],
 						iterY = [],
 						arrBirkX = [],
@@ -306,12 +307,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 							(math.pow(b, 2) * math.pow(math.sin(t), 2)));
 					};
 
-					// console.log(point);
-
-					// arrBirkX.push(functions.riemannSum(funcArclength, 0, theta, math.pow(10, 3)));
-					// arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
-					// 	{x: -a * math.sin(theta), y: b * math.cos(theta)}) / funcArclength(theta));
-
 					for(var i = 0; i < parseInt(toState.params.iter); i++) {
 						// Inner Dynamics
 						if(innerMagneticField != Infinity) {
@@ -353,14 +348,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							}
 						}
 
-						var phi1 = math.acos(point.x / a),
-							phi2 = math.asin(point.y / b),
-							phi = phi1;
-
-						// console.log("phis");
-						// console.log(point);
-						// console.log(phi1);
-						// console.log(phi2);
+						phi = math.acos(point.x / a);
 
 						if(point.x == 0 && point.y == b) { phi = 0; }
 						else if(point.x == 0 && point.y == -b) { phi = Math.PI; }
@@ -368,28 +356,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 							phi += 2 * (Math.PI - phi);
 						}
 						else if(point.x > 0 && point.y < 0) {
-							phi = phi2 + (2 * Math.PI);
+							phi = math.asin(point.y / b) + (2 * Math.PI);
 						}
-
-						// point.x == 0 ? phi = phi2 : phi = phi1;
-
-						// if(phi < 0) { phi += 2 * Math.PI; }
-
-						// if(i == 3) {
-						// 	console.log("point");
-						// 	console.log(point);
-						// 	console.log(phi);
-						// 	console.log(phi2);
-						// 	console.log({x: -a * math.sin(phi), y: b * math.cos(phi)});
-						// 	console.log(functions.dotProduct({x: point.v_x, y: point.v_y},
-						// 		{x: -a * math.sin(phi), y: b * math.cos(phi)}));
-						// 	console.log(funcArclength(phi));
-						// }
 
 						arrBirkX.push(functions.riemannSum(funcArclength, 0, phi, math.pow(10, 4)));
 						arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
-							{x: -a * (point.y / b), y: b * (point.x / a)}) / math.sqrt(math.pow(a * (point.y / b), 2) +
-							math.pow(b * (point.x / a), 2)));
+							{x: -a * (point.y / b), y: b * (point.x / a)})
+							/ math.sqrt(math.pow(a * (point.y / b), 2) + math.pow(b * (point.x / a), 2)));
 					}
 
 					// Plotting Data
@@ -426,9 +399,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 					 	mode: "markers",
 					  	type: "scatter"
 					};
-
-					// console.log(arrBirkX);
-					// console.log(arrBirkY);
 
 					var data = [trace1, trace2],
 						dataBirk = [trace3];

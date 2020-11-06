@@ -362,6 +362,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 
 
 
+	// Approximates an integral with a given integrand and domain via a Riemann sum
 	exports.riemannSum = function(func, a, b, n) {
 		var delta = (b - a) / n,
 			x = 0,
@@ -370,10 +371,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			x = a + (delta * i);
 			sum += func(x);
 		}
-		// console.log("info");
-		// console.log(b);
-		// console.log(delta);
-		// console.log(sum);
 		return sum * delta;
 	};
 
