@@ -187,8 +187,8 @@ define(["jquery", "app/functions"], ($, functions) => {
 					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					$(".indicator").hide();
 					functions.messageHandler(1);
-					$("#myDiv").remove();
-					var myDiv = $("<div>").attr("id", "myDiv").css({
+					$("#trajecPhoto").remove();
+					var trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
 							"display": "flex",
 							"align-items": "center",
 							"justify-content": "center"
@@ -203,8 +203,25 @@ define(["jquery", "app/functions"], ($, functions) => {
 							$("<div>").addClass("circle"));
 					spinner.append(clipper1, patch, clipper2);
 					wrapper.append(spinner);
-					myDiv.append(wrapper);
-					$("main").append(myDiv);
+					trajecPhoto.append(wrapper);
+					$("#Birk").remove();
+					var birk = $("<div>").attr("id", "Birk").css({
+							"display": "flex",
+							"align-items": "center",
+							"justify-content": "center"
+						}),
+						wrapper = $("<div>").addClass("preloader-wrapper big active"),
+						spinner = $("<div>").addClass("spinner-layer spinner-red-only"),
+						clipper1 = $("<div>").addClass("circle-clipper left").append(
+							$("<div>").addClass("circle")),
+						patch = $("<div>").addClass("gap-patch").append(
+							$("<div>").addClass("circle")),
+						clipper2 = $("<div>").addClass("circle-clipper right").append(
+							$("<div>").addClass("circle"));
+					spinner.append(clipper1, patch, clipper2);
+					wrapper.append(spinner);
+					birk.append(wrapper);
+					$("main").append(birk);
 					$("select").material_select();
 
 					// Initial Conditions
@@ -216,7 +233,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 					toState.params.outer == "Inf" ? outerMagneticField = Infinity
 						: outerMagneticField = parseFloat(toState.params.outer);
 
-					var theta = 0,
+					var theta = math.bignumber(toState.params.angle) * (Math.PI / 180),
 						a = math.abs(parseFloat(toState.params.hor)),
 						b = math.abs(parseFloat(toState.params.ver)),
 						max = math.max(a,b),
@@ -225,6 +242,8 @@ define(["jquery", "app/functions"], ($, functions) => {
 						stop = 0,
 						iterX = [],
 						iterY = [],
+						arrBirkX = [],
+						arrBirkY = [],
 						coefficientList = [],
 						check = 0,
 						mass = 1,
@@ -237,8 +256,8 @@ define(["jquery", "app/functions"], ($, functions) => {
 						});
 
 					var point = {
-						x: a * math.cos(math.bignumber(toState.params.angle) * (Math.PI / 180)),
-						y: b * math.sin(math.bignumber(toState.params.angle) * (Math.PI / 180)),
+						x: a * math.cos(theta),
+						y: b * math.sin(theta),
 						v_x: velocity.x,
 						v_y: velocity.y
 					};
@@ -282,6 +301,17 @@ define(["jquery", "app/functions"], ($, functions) => {
 					iterX.push(point.x);
 					iterY.push(point.y);
 
+					var funcArclength = function(t) {
+						return math.sqrt((math.pow(a, 2) * math.pow(math.cos(t), 2)) +
+							(math.pow(b, 2) * math.pow(math.sin(t), 2)));
+					};
+
+					// console.log(point);
+
+					// arrBirkX.push(functions.riemannSum(funcArclength, 0, theta, math.pow(10, 3)));
+					// arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
+					// 	{x: -a * math.sin(theta), y: b * math.cos(theta)}) / funcArclength(theta));
+
 					for(var i = 0; i < parseInt(toState.params.iter); i++) {
 						// Inner Dynamics
 						if(innerMagneticField != Infinity) {
@@ -322,6 +352,44 @@ define(["jquery", "app/functions"], ($, functions) => {
 									outerMagneticField, scaleFactor, 1);
 							}
 						}
+
+						var phi1 = math.acos(point.x / a),
+							phi2 = math.asin(point.y / b),
+							phi = phi1;
+
+						// console.log("phis");
+						// console.log(point);
+						// console.log(phi1);
+						// console.log(phi2);
+
+						if(point.x == 0 && point.y == b) { phi = 0; }
+						else if(point.x == 0 && point.y == -b) { phi = Math.PI; }
+						else if(point.x < 0 && point.y < 0) {
+							phi += 2 * (Math.PI - phi);
+						}
+						else if(point.x > 0 && point.y < 0) {
+							phi = phi2 + (2 * Math.PI);
+						}
+
+						// point.x == 0 ? phi = phi2 : phi = phi1;
+
+						// if(phi < 0) { phi += 2 * Math.PI; }
+
+						// if(i == 3) {
+						// 	console.log("point");
+						// 	console.log(point);
+						// 	console.log(phi);
+						// 	console.log(phi2);
+						// 	console.log({x: -a * math.sin(phi), y: b * math.cos(phi)});
+						// 	console.log(functions.dotProduct({x: point.v_x, y: point.v_y},
+						// 		{x: -a * math.sin(phi), y: b * math.cos(phi)}));
+						// 	console.log(funcArclength(phi));
+						// }
+
+						arrBirkX.push(functions.riemannSum(funcArclength, 0, phi, math.pow(10, 4)));
+						arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
+							{x: -a * (point.y / b), y: b * (point.x / a)}) / math.sqrt(math.pow(a * (point.y / b), 2) +
+							math.pow(b * (point.x / a), 2)));
 					}
 
 					// Plotting Data
@@ -351,27 +419,64 @@ define(["jquery", "app/functions"], ($, functions) => {
 						connectgaps: false
 					};
 
-					var data = [trace1, trace2];
+					var trace3 = {
+					  	x: arrBirkX,
+					  	y: arrBirkY,
+					 	name: "",
+					 	mode: "markers",
+					  	type: "scatter"
+					};
+
+					// console.log(arrBirkX);
+					// console.log(arrBirkY);
+
+					var data = [trace1, trace2],
+						dataBirk = [trace3];
 
 					var layout = {
 					  	grid: {rows: 1, columns: 1, pattern: 'independent'},
 					  	showlegend: false,
 					  	xaxis: {range: [-(max + scaleFactor), max + scaleFactor]},
-			  			yaxis: {range: [-(max + scaleFactor), max + scaleFactor]}
+			  			yaxis: {range: [-(max + scaleFactor), max + scaleFactor]},
+			  			title: "Particle Trajectory"
 					};
 
-					$("#myDiv").remove();
-					myDiv = $("<div>").attr("id", "myDiv").css({
+					var layoutBirk = {
+					  	grid: {rows: 1, columns: 1, pattern: 'independent'},
+					  	showlegend: false,
+					  	xaxis: {range: [0, 2.05 * Math.PI * max]},
+			  			yaxis: {range: [-1.05, 1.05]},
+			  			title: "Birkhoff Coordinates"
+					};
+
+					$("#trajecPhoto").remove();
+					trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
 						"margin": "0 auto",
 						"width": "700px",
 						"height": "700px" 
 					});
-					$("main").append(myDiv);
-					Plotly.newPlot("myDiv", data, layout, {scrollZoom: true, responsive: true});
-					$("#myDiv").children().first().children().first().children().first().css({
+					$("main").append(trajecPhoto);
+					Plotly.newPlot("trajecPhoto", data, layout, {scrollZoom: true, responsive: true});
+					$("#trajecPhoto").children().first().children().first().children().first().css({
 						"border-style": "solid",
 						"border-radius": "100px"
 					});
+
+					$("#Birk").remove();
+					birk = $("<div>").attr("id", "Birk").css({
+						"margin": "0 auto",
+						"width": "700px",
+						"height": "700px",
+						"padding-top": "30px"
+					});
+					$("main").append(birk);
+					Plotly.newPlot("Birk", dataBirk, layoutBirk, {scrollZoom: true, responsive: true});
+					$("#Birk").children().first().children().first().children().first().css({
+						"border-style": "solid",
+						"border-radius": "100px"
+					});
+
+					$("main").css("margin-bottom", "60px");
 
 					functions.handle_links(router);
 				});

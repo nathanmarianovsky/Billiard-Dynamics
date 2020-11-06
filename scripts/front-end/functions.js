@@ -349,6 +349,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 	};
 
 
+
 	// Tells whether at least two of the given values are true (or equal to 1)
 	exports.checker = function(bool1, bool2, bool3) {
 		var hold = 0;
@@ -357,6 +358,23 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			hold = 1;
 		}
 		return hold;
+	};
+
+
+
+	exports.riemannSum = function(func, a, b, n) {
+		var delta = (b - a) / n,
+			x = 0,
+			sum = 0;
+		for(var i = 0; i < n; i++) {
+			x = a + (delta * i);
+			sum += func(x);
+		}
+		// console.log("info");
+		// console.log(b);
+		// console.log(delta);
+		// console.log(sum);
+		return sum * delta;
 	};
 
 	return exports;
