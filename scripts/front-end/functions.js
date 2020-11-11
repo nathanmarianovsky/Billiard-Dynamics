@@ -11,11 +11,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			}
 			else if(id == "home") {
 				router.navigate("def");
-				for(var i = 1; i < 9; i++) {
-					$("#variable" + i).val("");
-				}
-				$("#innerInf").attr("checked", false);
-				$("#outerInf").attr("checked", false);
 			}
 			else if(id == "configuration") {
 				router.navigate("config");
@@ -27,7 +22,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				var indicator = 1,
 					mag1 = 0,
 					mag2 = 0;
-				for(var i = 1; i < 9; i++) {
+				for(var i = 1; i < 8; i++) {
 					if(String($("#variable" + i).val()).length == 0) {
 						if(i == 3) {
 							if(!$("#innerInf").is(":checked")) {
@@ -44,7 +39,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 						}
 					}
 				}
-				if(parseInt($("#variable8").val()) < 1) { indicator = 0; }
+				if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
 				if(indicator == 1) {
 					$("#innerInf").is(":checked") == true ? mag1 = "Inf"
 						: mag1 = $("#variable3").val();
@@ -55,13 +50,12 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 						ver: $("#variable2").val(),
 						inner: mag1,
 						outer: mag2,
-						vel1: $("#variable5").val(),
-						vel2: $("#variable6").val(),
-						angle: $("#variable7").val(),
-						iter: $("#variable8").val(),
+						theta: $("#variable5").val(),
+						phi: $("#variable6").val(),
+						iter: $("#variable7").val(),
 					});
 				}
-				else if(parseInt($("#variable8").val()) < 1) {
+				else if(parseInt($("#variable7").val()) < 1) {
 					alert("The number of iterations must be a positive integer!");
 				}
 				else {
@@ -295,7 +289,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 		// Keep count of the number of steps to break out when necessary
 		var steps = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3.8);
+			index = math.pow(10, -3.9);
 
 		// A point used to determine whether traveling in positive time lands in the exterior or interior of a region
 		var check1 = exports.evaluateMagneticTrajectory(index,
