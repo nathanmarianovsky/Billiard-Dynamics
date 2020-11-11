@@ -486,20 +486,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 									curY = [],
 									displayY = [],
 									add = parseInt(.01 * iterX.length);
-								// container.push({
-								// 	data: [
-								// 		{x: arrX, y: arrY},
-								// 		{x: iterX.slice(0, 1), y: iterY.slice(0, 1)}
-								// 	],
-								// 	name: "frame1"
-								// });
-								// container.push({
-								// 	data: [
-								// 		{x: arrX, y: arrY},
-								// 		{x: iterX.slice(0, 10000), y: iterY.slice(0, 10000)}
-								// 	],
-								// 	name: "frame2"
-								// });
 								for(var i = 0; i < iterX.length; i += add) {
 									count++;
 									displayX = [];
@@ -507,7 +493,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 									curX = iterX.slice(0, i);
 									curY = iterY.slice(0, i);
 									for(var j = 0; j < curX.length; j++) {
-										if(j % 100 == 0) {
+										if(j % 100 == 0 || curX[j] == null) {
 											displayX.push(curX[j]);
 											displayY.push(curY[j]);
 										}
@@ -547,60 +533,9 @@ define(["jquery", "app/functions"], ($, functions) => {
 							"border-radius": "100px"
 						});
 
-						var animation = $("<div>").attr("id", "animation").css({
-							"margin": "0 auto",
-							"width": "700px",
-							"height": "100px",
-							"background-color": "white",
-							"border": "0.8mm solid black",
-							"border-radius": "15px",
-							"margin-bottom": "20px"
-						}).append(
-							$("<div>").attr("id", "animateTitle").text("Title Here").css({
-								"margin": "0 auto",
-								"text-align": "center",
-								"font-size": "20px",
-								"border-bottom": "0.6mm solid black",
-								"height": "40px"
-							}),
-							$("<div>").css({
-								"height": "60px",
-								"display": "flex",
-								"align-items": "center"
-								}).append($("<a>").attr("id", "animate").addClass("waves-effect blue waves-light btn")
-								.append($("<i>").addClass("material-icons right").text("cloud")).text("button").css({
-									"margin": "0 auto"
-								}))
-						);
-						// $("main").append(animation);
-						$(".information").after(animation);
-
 						main.css("margin-bottom", "60px");
 
 						functions.handle_links(router);
-
-						// $("main").append($("<a>").attr("id", "animate").addClass("waves-effect blue waves-light btn")
-						// 	.append($("<i>").addClass("material-icons right").text("cloud")).text("button"));
-
-						function startAnimation() {
-							var list = [],
-								frames = [],
-								transitions = [];
-							for(var i = 1; i < count + 1; i++) {
-								list.push("frame" + i);
-								frames.push({duration: 100});
-								transitions.push({duration: 1, easing: "cubic-in"});
-							}
-						 	Plotly.animate("trajecPhoto", list, {
-							    frame: frames,
-							    transition: transitions,
-							    mode: 'afterall'
-						  	});
-						}
-
-						$("#animate").on("click", function(e) {
-							startAnimation();
-						});
 					});
 				});
 			});

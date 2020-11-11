@@ -11,6 +11,18 @@ nav {
 	border-top: 1px white solid;
 }
 
+.tabs {
+	background-color: #003333;
+}
+
+.tabs .tab {
+	width: 10%;
+}
+
+.tabs .indicator {
+	background-color: #EDCF40;
+}
+
 /*------------------------------- All Styles Pertaining to the Main Body -------------------------------*/
 body {
 	background-color: #669999;
@@ -138,14 +150,6 @@ main table a {
     padding-left: 12px;
 }
 
-.tabs {
-	background-color: #003333;
-}
-
-.tabs .tab {
-	width: 10%;
-}
-
 .tabs .tab a {
 	color: white;
 	cursor: pointer;
@@ -157,8 +161,4 @@ main table a {
 
 #intro {
 	padding-top: 30px;
-}
-
-.tabs .indicator {
-	background-color: #EDCF40;
 }

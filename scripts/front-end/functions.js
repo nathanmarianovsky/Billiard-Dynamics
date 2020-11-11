@@ -226,6 +226,8 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			}
 		}
 		else {
+			var reverseArrX = [],
+				reverseArrY = [];
 			var pointIter = {
 				x: point.x,
 				y: point.y,
@@ -251,14 +253,18 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			point = pointIter;
 			iterX.push(null);
 			iterY.push(null);
-			iterX.push(pointIter.x);
-			iterY.push(pointIter.y);
+			reverseArrX.push(pointIter.x);
+			reverseArrY.push(pointIter.y);
 			while((-(max + scale) <= pointIter.x) && (pointIter.x <= max + scale)
 				&& (-(max + scale) <= pointIter.y) && (pointIter.y <= max + scale)) {
 				pointIter = exports.evaluateTrajectoryStep(math.pow(10, -4),
 					pointIter.x, pointIter.y, pointIter.v_x, pointIter.v_y);
-				iterX.push(pointIter.x);
-				iterY.push(pointIter.y);
+				reverseArrX.push(pointIter.x);
+				reverseArrY.push(pointIter.y);
+			}
+			for(var i = 1; i < reverseArrX.length + 1; i++) {
+				iterX.push(reverseArrX[reverseArrX.length - i]);
+				iterY.push(reverseArrY[reverseArrY.length - i]);
 			}
 			if(innerMagneticField == Infinity) {
 				point = exports.reflectTrajectory(point.x, point.y,
@@ -280,36 +286,24 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 
 	// Records the points attained along a magnetic trajectory in the plane
 	exports.magneticPlotting = function(point, math, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver) {
-		// Generates the list of coefficients used for a single magnetic trajectory
-		var coefficientList = exports.evaluateCoefficients(point.x, point.y, point.v_x, point.v_y);
-
-		// Resets the start time for the magnetic trajectory
-		var param = 0;
-
-		// Keep count of the number of steps to break out when necessary
-		var steps = 0,
+		var coefficientList = exports.evaluateCoefficients(point.x, point.y, point.v_x, point.v_y),
+			param = 0,
+			steps = 0,
+			index = 0,
+			sum = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3.9);
-
-		// A point used to determine whether traveling in positive time lands in the exterior or interior of a region
-		var check1 = exports.evaluateMagneticTrajectory(index,
-				coefficientList[0], coefficientList[1], coefficientList[2],
-				coefficientList[3], scaling),
-			check2 = exports.evaluateMagneticTrajectory(10 * index,
-				coefficientList[0], coefficientList[1], coefficientList[2],
-				coefficientList[3], scaling),
-			check3 = exports.evaluateMagneticTrajectory(index / 10,
+			index = math.pow(10, -3.5),
+			indexArr = [math.pow(10, -2.5), math.pow(10, -3.2), 
+				math.pow(10, -3.8), math.pow(10, -4.5), math.pow(10, -3.5)];
+		for(var i = 0; i < 5; i++) {
+			var check = exports.evaluateMagneticTrajectory(indexArr[i],
 				coefficientList[0], coefficientList[1], coefficientList[2],
 				coefficientList[3], scaling);
+			if(exports.checkRegion(check, xLength, yLength, math) == ver) { sum++; }
+		}
 
-		// Evaluate outer trajectory and add to the list
-		var result1 = exports.checkRegion(check1, xLength, yLength, math) == ver ? 1 : 0,
-			result2 = exports.checkRegion(check2, xLength, yLength, math) == ver ? 1 : 0,
-			result3 = exports.checkRegion(check3, xLength, yLength, math) == ver ? 1 : 0;
-		var val = exports.checker(result1, result2, result3);
-
-		if(val) {
-			point = check1;
+		if(sum > 1) {
+			point = check;
 			while(exports.checkRegion(point, xLength, yLength, math) == ver) {
 				if(steps >= bound) { break; }
 				else { steps++; }
@@ -325,6 +319,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				if(steps >= bound) { break; }
 				else { steps++; }
 				param -= index;
+				console.log(point);
 				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
 					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
 				iterX.push(point.x);
