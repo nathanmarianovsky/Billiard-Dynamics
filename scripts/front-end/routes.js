@@ -313,7 +313,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 						for(var i = 0; i < parseInt(toState.params.iter); i++) {
 							// Inner Dynamics
 							if(innerMagneticField != Infinity) {
-								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+								check = functions.evaluateTrajectoryStep(math.pow(10, -3),
 									point.x, point.y, point.v_x, point.v_y);
 								if(functions.checkRegion(check, a, b, math) == 1) {
 									point.v_x *= -1;
@@ -493,7 +493,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 									curX = iterX.slice(0, i);
 									curY = iterY.slice(0, i);
 									for(var j = 0; j < curX.length; j++) {
-										if(j % 100 == 0 || curX[j] == null) {
+										if(j % 50 == 0 || curX[j] == null || j == curX.length - 1) {
 											displayX.push(curX[j]);
 											displayY.push(curY[j]);
 										}

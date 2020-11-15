@@ -204,28 +204,31 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 	// Records the points attained along a non-magnetic trajectory inside the ellipse
 	exports.plotting = function(point, math, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver) {
 		if(ver == 0) {
+			var holder = {x: point.x, y: point.y, v_x: point.v_x, v_y: point.v_y};
+			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
+				point.x, point.y, point.v_x, point.v_y);
+			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
+				point = exports.evaluateTrajectoryStep(math.pow(10, -4),
+						point.x, point.y, point.v_x, point.v_y);
+				iterX.push(point.x);
+				iterY.push(point.y);
+				while(exports.checkRegion(point, xLength, yLength, math) == 0) {
+					point = exports.evaluateTrajectoryStep(math.pow(10, -4),
+						point.x, point.y, point.v_x, point.v_y);
+					iterX.push(point.x);
+					iterY.push(point.y);
+				}
+			}
 			if(outerMagneticField == Infinity) {
-				point = exports.evaluateTrajectory(point.x, point.y,
-					point.v_x, point.v_y, xLength, yLength);
+				point = exports.evaluateTrajectory(holder.x, holder.y,
+					holder.v_x, holder.v_y, xLength, yLength);
 				iterX.push(point.x);
 				iterY.push(point.y);
 				point = exports.reflectTrajectory(point.x, point.y,
 					point.v_x, point.v_y, xLength, yLength);
 			}
-			else {
-				var check = exports.evaluateTrajectoryStep(math.pow(10, -4),
-					point.x, point.y, point.v_x, point.v_y);
-				if(exports.checkRegion(check, xLength, yLength, math) == 0) {
-					while(exports.checkRegion(point, xLength, yLength, math) == 0) {
-						point = exports.evaluateTrajectoryStep(math.pow(10, -4),
-							point.x, point.y, point.v_x, point.v_y);
-						iterX.push(point.x);
-						iterY.push(point.y);
-					}
-				}
-			}
 		}
-		else {
+		else if(ver == 1) {
 			var reverseArrX = [],
 				reverseArrY = [];
 			var pointIter = {
@@ -292,7 +295,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 			index = 0,
 			sum = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3.5),
+			index = math.pow(10, -3.697),
 			indexArr = [math.pow(10, -2.5), math.pow(10, -3.2), 
 				math.pow(10, -3.8), math.pow(10, -4.5), math.pow(10, -3.5)];
 		for(var i = 0; i < 5; i++) {
@@ -301,7 +304,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				coefficientList[3], scaling);
 			if(exports.checkRegion(check, xLength, yLength, math) == ver) { sum++; }
 		}
-
 		if(sum > 1) {
 			point = check;
 			while(exports.checkRegion(point, xLength, yLength, math) == ver) {
@@ -319,7 +321,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				if(steps >= bound) { break; }
 				else { steps++; }
 				param -= index;
-				console.log(point);
+				// console.log(point);
 				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
 					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
 				iterX.push(point.x);
