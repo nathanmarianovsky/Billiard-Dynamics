@@ -1,4 +1,4 @@
-define(["jquery", "app/functions", "math"], ($, functions, math) => {
+define(["jquery", "math"], ($, math) => {
 	var exports = {};
 
 	// Handles all links on the page
@@ -68,6 +68,7 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 
 
 
+	// Hides the body of certain tables when needed
 	exports.messageHandler = function(closed) {
 		if(closed == 1) {
 			$(".notes_table > tbody > tr").hide();
@@ -92,13 +93,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 		var firstComponent = v.x / math.sqrt(exports.dotProduct(v, v)),
 			secondComponent = v.y / math.sqrt(exports.dotProduct(v, v));
 		return {x: firstComponent, y: secondComponent};
-	};
-
-
-
-	// Returns the coefficients for the trajectory carved out due to the magnetic field
-	exports.evaluateCoefficients = function(x_1, x_2, v_1, v_2) {
-		return [x_1, v_1, x_2, v_2];
 	};
 
 
@@ -151,58 +145,15 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 
 
 
-	// This represents the implicit function assocaited to the ellipse and is used by the bisection method to determine its roots
-	exports.magneticFunction = function(t, A, B, C, D, K, xLength, yLength) {
-		var value1 = math.sin(math.abs(K) * t),
-			value2 = math.cos(math.abs(K) * t),
-			firstComponent = A + ((B / math.abs(K)) * value1) + ((D / K) * (1 - value2)),
-			secondComponent = C + ((D / math.abs(K)) * value1) + ((B / K) * (value2 - 1));
-		return math.pow(firstComponent / xLength, 2) +
-			math.pow(secondComponent / yLength, 2) - 1;
-	};
-
-
-
 	// Checks whether a given point is outside the ellipse
-	exports.checkRegion = function(info, xLength, yLength, math) {
+	exports.checkRegion = function(info, xLength, yLength) {
 		return math.pow(info.x / xLength, 2) + math.pow(info.y / yLength, 2) > 1 ? 1 : 0;
 	};
 
 
 
-	// The bisection method returns an approximation of a root given an interval that contains it
-	exports.bisection = function(interval, func, err, A, B, C, D, K, xLength, yLength) {
-		var attempt = (interval[0] + interval[1]) / 2,
-			evaluation = func(attempt, A, B, C, D, K, xLength, yLength);
-		while(math.abs(evaluation) > err) {
-			if(func(interval[0], A, B, C, D, K, xLength, yLength) > 0 &&
-				func(interval[1], A, B, C, D, K, xLength, yLength) < 0) {
-				if(evaluation > 0) {
-					interval[0] = attempt;
-				}
-				else {
-					interval[1] = attempt;
-				}
-			}
-			else if(func(interval[0], A, B, C, D, K, xLength, yLength) < 0 &&
-				func(interval[1], A, B, C, D, K, xLength, yLength) > 0) {
-				if(evaluation > 0) {
-					interval[1] = attempt;
-				}
-				else {
-					interval[0] = attempt;
-				}
-			}
-			attempt = (interval[0] + interval[1]) / 2;
-			evaluation = func(attempt, A, B, C, D, K, xLength, yLength);
-		}
-		return attempt;
-	}
-
-
-
 	// Records the points attained along a non-magnetic trajectory inside the ellipse
-	exports.plotting = function(point, math, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver) {
+	exports.plotting = function(point, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver) {
 		if(ver == 0) {
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 				point.x, point.y, point.v_x, point.v_y);
@@ -288,8 +239,8 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 
 
 	// Records the points attained along a magnetic trajectory in the plane
-	exports.magneticPlotting = function(point, math, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver) {
-		var coefficientList = exports.evaluateCoefficients(point.x, point.y, point.v_x, point.v_y),
+	exports.magneticPlotting = function(point, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver) {
+		var coefficientList = [point.x, point.v_x, point.y, point.v_y],
 			param = 0,
 			steps = 0,
 			index = 0,
@@ -321,7 +272,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				if(steps >= bound) { break; }
 				else { steps++; }
 				param -= index;
-				// console.log(point);
 				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
 					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
 				iterX.push(point.x);
@@ -337,18 +287,6 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 				point.v_x, point.v_y, xLength, yLength);
 		}
 		return point;
-	};
-
-
-
-	// Tells whether at least two of the given values are true (or equal to 1)
-	exports.checker = function(bool1, bool2, bool3) {
-		var hold = 0;
-		if((bool1 == 1 && bool2 == 1) || (bool1 == 1 && bool3 == 1) ||
-			(bool2 == 1 && bool3 == 1)) {
-			hold = 1;
-		}
-		return hold;
 	};
 
 

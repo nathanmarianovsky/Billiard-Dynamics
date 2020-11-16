@@ -314,17 +314,17 @@ define(["jquery", "app/functions"], ($, functions) => {
 							if(innerMagneticField != Infinity) {
 								check = functions.evaluateTrajectoryStep(math.pow(10, -3),
 									point.x, point.y, point.v_x, point.v_y);
-								if(functions.checkRegion(check, a, b, math) == 1) {
+								if(functions.checkRegion(check, a, b) == 1) {
 									point.v_x *= -1;
 									point.v_y *= -1;
 								}
 								if(innerMagneticField == 0) {
-									point = functions.plotting(point, math, a, b,
+									point = functions.plotting(point, a, b,
 										iterX, iterY, innerMagneticField,
 										outerMagneticField, scaleFactor, 0);
 								}
 								else {
-									point = functions.magneticPlotting(point, math, a, b,
+									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, innerScaling, innerMagneticField,
 										outerMagneticField, 0);
 								}
@@ -332,29 +332,26 @@ define(["jquery", "app/functions"], ($, functions) => {
 
 							// Outer Dynamics
 							if(outerMagneticField != Infinity) {
-								console.log(i);
-								console.log(point);
 								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 									point.x, point.y, point.v_x, point.v_y);
-								if(functions.checkRegion(check, a, b, math) == 0) {
+								if(functions.checkRegion(check, a, b) == 0) {
 									point.v_x *= -1;
 									point.v_y *= -1;
 								}
-								console.log(point);
 								if(outerMagneticField != 0) {
-									point = functions.magneticPlotting(point, math, a, b,
+									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, outerScaling, innerMagneticField,
 										outerMagneticField, 1);
 								}
 								else {
-									point = functions.plotting(point, math, a, b,
+									point = functions.plotting(point, a, b,
 										iterX, iterY, innerMagneticField,
 										outerMagneticField, scaleFactor, 1);
 								}
 								if(innerMagneticField != Infinity) {
 									check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 										point.x, point.y, point.v_x, point.v_y);
-									if(functions.checkRegion(check, a, b, math) == 1) {
+									if(functions.checkRegion(check, a, b) == 1) {
 										point.v_x *= -1;
 										point.v_y *= -1;
 									}
