@@ -204,29 +204,29 @@ define(["jquery", "app/functions", "math"], ($, functions, math) => {
 	// Records the points attained along a non-magnetic trajectory inside the ellipse
 	exports.plotting = function(point, math, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver) {
 		if(ver == 0) {
-			var holder = {x: point.x, y: point.y, v_x: point.v_x, v_y: point.v_y};
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 				point.x, point.y, point.v_x, point.v_y);
 			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
-				point = exports.evaluateTrajectoryStep(math.pow(10, -4),
+				check = exports.evaluateTrajectoryStep(math.pow(10, -4),
 						point.x, point.y, point.v_x, point.v_y);
-				iterX.push(point.x);
-				iterY.push(point.y);
-				while(exports.checkRegion(point, xLength, yLength, math) == 0) {
-					point = exports.evaluateTrajectoryStep(math.pow(10, -4),
-						point.x, point.y, point.v_x, point.v_y);
-					iterX.push(point.x);
-					iterY.push(point.y);
+				iterX.push(check.x);
+				iterY.push(check.y);
+				while(exports.checkRegion(check, xLength, yLength, math) == 0) {
+					check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+						check.x, check.y, check.v_x, check.v_y);
+					iterX.push(check.x);
+					iterY.push(check.y);
 				}
 			}
 			if(outerMagneticField == Infinity) {
-				point = exports.evaluateTrajectory(holder.x, holder.y,
-					holder.v_x, holder.v_y, xLength, yLength);
+				point = exports.evaluateTrajectory(point.x, point.y,
+					point.v_x, point.v_y, xLength, yLength);
 				iterX.push(point.x);
 				iterY.push(point.y);
 				point = exports.reflectTrajectory(point.x, point.y,
 					point.v_x, point.v_y, xLength, yLength);
 			}
+			else { point = check; }
 		}
 		else if(ver == 1) {
 			var reverseArrX = [],

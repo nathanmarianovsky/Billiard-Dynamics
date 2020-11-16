@@ -192,7 +192,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 					main.append(table);
 					$.get("/client/main.html").done(function(result) {
 						main.append(result);
-						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 						$(".indicator").hide();
 						functions.messageHandler(1);
 						$("#trajecPhoto").remove();
@@ -333,12 +332,15 @@ define(["jquery", "app/functions"], ($, functions) => {
 
 							// Outer Dynamics
 							if(outerMagneticField != Infinity) {
+								console.log(i);
+								console.log(point);
 								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 									point.x, point.y, point.v_x, point.v_y);
 								if(functions.checkRegion(check, a, b, math) == 0) {
 									point.v_x *= -1;
 									point.v_y *= -1;
 								}
+								console.log(point);
 								if(outerMagneticField != 0) {
 									point = functions.magneticPlotting(point, math, a, b,
 										iterX, iterY, outerScaling, innerMagneticField,
@@ -417,8 +419,22 @@ define(["jquery", "app/functions"], ($, functions) => {
 						var layout = {
 						  	grid: {rows: 1, columns: 1, pattern: "independent"},
 						  	showlegend: false,
-						  	xaxis: {range: [-(max + scaleFactor), max + scaleFactor]},
-				  			yaxis: {range: [-(max + scaleFactor), max + scaleFactor]},
+						  	xaxis: {
+						  		range: [-(max + scaleFactor), max + scaleFactor],
+						  		title: "$x-\\text{axis}$",
+							    showticklabels: true,
+							    tickangle: "auto",
+							    exponentformat: "e",
+							    showexponent: "all"
+						  	},
+				  			yaxis: {
+				  				range: [-(max + scaleFactor), max + scaleFactor],
+				  				title: "$y-\\text{axis}$",
+							    showticklabels: true,
+							    tickangle: "auto",
+							    exponentformat: "e",
+							    showexponent: "all"
+				  			},
 				  			title: "Particle Trajectory",
 				  			updatemenus: [{
 							      	x: 0,
@@ -465,7 +481,14 @@ define(["jquery", "app/functions"], ($, functions) => {
 						var layoutBirk = {
 						  	grid: {rows: 1, columns: 1, pattern: "independent"},
 						  	showlegend: false,
-						  	xaxis: {range: [0, 2.05 * Math.PI * max]},
+						  	xaxis: {
+						  		range: [0, 2.05 * Math.PI * max],
+						  		title: "$\\text{Arc Length with Starting Position at }($" + a + "$,0)$",
+							    showticklabels: true,
+							    tickangle: "auto",
+							    exponentformat: "e",
+							    showexponent: "all"
+						  	},
 				  			yaxis: {range: [-1.05, 1.05]},
 				  			title: "Birkhoff Coordinates"
 						};
@@ -536,6 +559,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 						main.css("margin-bottom", "60px");
 
 						functions.handle_links(router);
+						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					});
 				});
 			});
