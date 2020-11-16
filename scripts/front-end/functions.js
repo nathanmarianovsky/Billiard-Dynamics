@@ -3,7 +3,7 @@ define(["jquery", "math"], ($, math) => {
 
 	// Handles all links on the page
 	exports.handle_links = function(router) {
-		$("a").on("click", function(e) {
+		$("body").on("click", "a", function(e) {
 			e.preventDefault();
 			var id = $(this).attr("id");
 			if(id == "source") {
@@ -14,6 +14,38 @@ define(["jquery", "math"], ($, math) => {
 			}
 			else if(id == "configuration") {
 				router.navigate("config");
+			}
+			else if(id == "mainMenu") {
+				var sidenav = $(".side-nav");
+				sidenav.empty();
+				// <i class="material-icons left" style="padding-right: 30px;">arrow_backward</i>
+				sidenav.append($("<li>").addClass("no-padding")
+					.append($("<a>").addClass("menuItems participant")
+					.attr("id", "configuration").text("Main Menu")),
+					$("<li>").addClass("divider"),
+					$("<li>").addClass("no-padding")
+					.append($("<a>").addClass("menuItems participant")
+					.attr("id", "examples").text("Examples")
+					.append($("<i>").addClass("material-icons right")
+					.css("padding-right", "30px").text("arrow_forward"))));
+				exports.handle_links(router);
+			}
+			else if(id == "examples") {
+				console.log("examples");
+				var sidenav = $(".side-nav");
+				sidenav.empty();
+				// <i class="material-icons left" style="padding-right: 30px;">arrow_backward</i>
+				sidenav.append($("<li>").addClass("no-padding")
+					.append($("<a>").addClass("menuItems participant")
+					.attr("id", "mainMenu").text("Main Menu")
+					.append($("<i>").addClass("material-icons left")
+					.css("padding-right", "30px").text("arrow_backward"))),
+					$("<li>").addClass("divider"));
+				for(var i = 1; i < 11; i++) {
+					sidenav.append($("<li>").addClass("no-padding")
+						.append($("<a>").addClass("menuItems participant")
+						.attr("id", "example" + i).text("Example " + i)));
+				}
 			}
 			else if(id.split("example")[0] == "") {
 				router.navigate("example", {num: id.split("example")[1]});

@@ -23,6 +23,37 @@ nav {
 	background-color: #EDCF40;
 }
 
+/*------------------------------- All Styles Pertaining to the Navigation Bar -------------------------------*/
+
+.side-nav {
+	left: 0px;
+	top: 64px;
+	width: 350px;
+}
+
+.divider {
+	height: 5px;
+	background-color: #e0e0e0;
+}
+
+.menuItems {
+	line-height: 64px;
+	font-size: 12px;
+	font-weight: 700;
+	margin: 0 15px;
+	padding-left: 15px;
+	cursor: pointer;
+}
+
+.side-nav i {
+	line-height: inherit;
+	width: 2rem;
+	font-size: 1.6rem;
+	display: block;
+	text-align: center;
+	margin-right: 1rem;
+}
+
 /*------------------------------- All Styles Pertaining to the Main Body -------------------------------*/
 body {
 	background-color: #669999;
@@ -30,8 +61,9 @@ body {
 
 main {
 	color: black;
-	width: 70%;
-	margin: 30px auto 30px auto;
+	width: 90%;
+	margin: -30px auto 30px auto;
+	padding-left: 350px;
 }
 
 .message {
@@ -98,10 +130,10 @@ main table a {
 	border-radius: 15px;
 }
 
-#configuration {
+/*#configuration {
 	display: flex;
  	justify-content: center;
-}
+}*/
 
 .row {
 	margin-top: 30px;
@@ -150,14 +182,14 @@ main table a {
     padding-left: 12px;
 }
 
-.tabs .tab a {
+/*.tabs .tab a {
 	color: white;
 	cursor: pointer;
 }
 
 .tabs .tab a:hover {
 	color: #9BC2C2;
-}
+}*/
 
 #intro {
 	padding-top: 30px;
