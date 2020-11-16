@@ -130,10 +130,10 @@ main table a {
 	border-radius: 15px;
 }
 
-/*#configuration {
+#configuration {
 	display: flex;
  	justify-content: center;
-}*/
+}
 
 .row {
 	margin-top: 30px;
@@ -181,15 +181,6 @@ main table a {
 	padding-top: 25px;
     padding-left: 12px;
 }
-
-/*.tabs .tab a {
-	color: white;
-	cursor: pointer;
-}
-
-.tabs .tab a:hover {
-	color: #9BC2C2;
-}*/
 
 #intro {
 	padding-top: 30px;

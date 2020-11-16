@@ -8,27 +8,14 @@ define(["jquery", "app/functions"], ($, functions) => {
 		router.addRouteListener("def", (toState, fromState) => {
 			var main = $("main");
 			main.empty();
-			// $("#configuration").css({
-			// 	"cursor": "pointer",
-			// 	"color": "white"
-			// });
-			// $("#configuration").parent().removeClass("active");
-			// $("#home").on("click", function(event) {
-			// 	event.preventDefault();
-			// }).css({
-			// 	"cursor": "inherit",
-			// 	"color": "#EDCF40"
-			// });
-			// $("#home").parent().addClass("active");
+			functions.sideNavInitial(0, "home");
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
-				// $(".indicator").hide();
 				$.get("/client/cases.html").done(function(cases) {
 					main.append(cases);
-					$("select").material_select();
-					Materialize.updateTextFields();
 					functions.handle_links(router);
 					functions.messageHandler(0);
+					$("select").material_select();
 					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 				});
 			});
@@ -38,18 +25,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 		router.addRouteListener("config", (toState, fromState) => {
 			var main = $("main");
 			main.empty();
-			// $("#home").css({
-			// 	"cursor": "pointer",
-			// 	"color": "white"
-			// });
-			// $("#home").parent().removeClass("active");
-			// $("#configuration").on("click", function(event) {
-			// 	event.preventDefault();
-			// }).css({
-			// 	"cursor": "inherit",
-			// 	"color": "#EDCF40"
-			// });
-			// $("#configuration").parent().addClass("active");
+			functions.sideNavInitial(0, "change");
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
 				$(".indicator").hide();
@@ -57,10 +33,10 @@ define(["jquery", "app/functions"], ($, functions) => {
 					main.append(table);
 					$.get("/client/main.html").done(function(primary) {
 						main.append(primary);
-						$("select").material_select();
-						Materialize.updateTextFields();
 						functions.handle_links(router);
 						functions.messageHandler(0);
+						$("select").material_select();
+						Materialize.updateTextFields();
 						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					});
 				});
@@ -72,19 +48,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 			var num = parseInt(toState.params.num),
 				main = $("main");
 			main.empty();
-			// $("#home").css({
-			// 	"cursor": "pointer",
-			// 	"color": "white"
-			// });
-			// $("#home").parent().removeClass("active");
-			// $("#configuration").css({
-			// 	"cursor": "pointer",
-			// 	"color": "white"
-			// });
-			// $("#configuration").parent().removeClass("active");
-			// $("#home").parent().removeClass("active");
-			// $("#home").parent().removeClass("active");
-			// $(".indicator").show();
+			functions.sideNavInitial(1, "example" + num);
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
 				$.get("/client/example.html").done(function(result) {
@@ -176,6 +140,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							});
 						main.append(bdy);
 					}
+					$("select").material_select();
 					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					functions.handle_links(router);
 				});
@@ -186,6 +151,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 		router.addRouteListener("mod", (toState, fromState) => {
 			var main = $("main");
 			main.empty();
+			functions.sideNavInitial(0, "change");
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
 				$.get("/client/ellipse.html").done(function(table) {
@@ -229,7 +195,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 						wrapper.append(spinner);
 						birk.append(wrapper);
 						$("main").append(birk);
-						$("select").material_select();
 
 						// Initial Conditions
 						var innerMagneticField = 0,
@@ -296,7 +261,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 						$("#variable5").val(toState.params.theta);
 						$("#variable6").val(toState.params.phi);
 						$("#variable7").val(toState.params.iter);
-						Materialize.updateTextFields();
+						// Materialize.updateTextFields();
 
 						// Collecting Data
 
@@ -553,19 +518,57 @@ define(["jquery", "app/functions"], ($, functions) => {
 							"border-radius": "100px"
 						});
 
+						$(".button-collapse").sideNav({ "menuWidth": "350px" });
 						main.css("margin-bottom", "60px");
-
-						// <a data-activates="slide-out" class="button-collapse links">MENU</a>
-						// $.get("/client/sidenav.html").done(function(content) {
-							// $("header").append(content);
-							// $("main").append($("<div>").append($("<a>").attr("data-activates", "slide-out").addClass("button-collapse").text("BUTTON")));
-							$(".button-collapse").sideNav({
-								"menuWidth": "350px"
-							});
-			    			
-							functions.handle_links(router);
-							MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
-						// });
+						functions.handle_links(router);
+						$("select").material_select();
+						Materialize.updateTextFields();
+						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
+						$("#config").on("click", function(e) {
+							var indicator = 1,
+								mag1 = 0,
+								mag2 = 0;
+							for(var i = 1; i < 8; i++) {
+								if(String($("#variable" + i).val()).length == 0) {
+									if(i == 3) {
+										if(!$("#innerInf").is(":checked")) {
+											indicator = 0;
+										}
+									}
+									else if(i == 4) {
+										if(!$("#outerInf").is(":checked")) {
+											indicator = 0;
+										}
+									}
+									else {
+										indicator = 0;
+									}
+								}
+							}
+							if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
+							if(indicator == 1) {
+								$("#innerInf").is(":checked") == true ? mag1 = "Inf"
+									: mag1 = $("#variable3").val();
+								$("#outerInf").is(":checked") == true ? mag2 = "Inf"
+									: mag2 = $("#variable4").val();
+								router.navigate("mod", {
+									hor: $("#variable1").val(),
+									ver: $("#variable2").val(),
+									inner: mag1,
+									outer: mag2,
+									theta: $("#variable5").val(),
+									phi: $("#variable6").val(),
+									iter: $("#variable7").val(),
+								});
+							}
+							else if(parseInt($("#variable7").val()) < 1) {
+								alert("The number of iterations must be a positive integer!");
+							}
+							else {
+								alert("All of the requested information is necessary! Please " +
+									"fill in whatever data is missing and submit again.");
+							}
+						});
 					});
 				});
 			});

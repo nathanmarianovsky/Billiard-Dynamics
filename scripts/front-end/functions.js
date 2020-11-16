@@ -16,86 +16,59 @@ define(["jquery", "math"], ($, math) => {
 				router.navigate("config");
 			}
 			else if(id == "mainMenu") {
-				var sidenav = $(".side-nav");
-				sidenav.empty();
-				// <i class="material-icons left" style="padding-right: 30px;">arrow_backward</i>
-				sidenav.append($("<li>").addClass("no-padding")
-					.append($("<a>").addClass("menuItems participant")
-					.attr("id", "configuration").text("Main Menu")),
-					$("<li>").addClass("divider"),
-					$("<li>").addClass("no-padding")
-					.append($("<a>").addClass("menuItems participant")
-					.attr("id", "examples").text("Examples")
-					.append($("<i>").addClass("material-icons right")
-					.css("padding-right", "30px").text("arrow_forward"))));
-				exports.handle_links(router);
+				exports.sideNavInitial(0, null);
 			}
 			else if(id == "examples") {
-				console.log("examples");
-				var sidenav = $(".side-nav");
-				sidenav.empty();
-				// <i class="material-icons left" style="padding-right: 30px;">arrow_backward</i>
-				sidenav.append($("<li>").addClass("no-padding")
-					.append($("<a>").addClass("menuItems participant")
-					.attr("id", "mainMenu").text("Main Menu")
-					.append($("<i>").addClass("material-icons left")
-					.css("padding-right", "30px").text("arrow_backward"))),
-					$("<li>").addClass("divider"));
-				for(var i = 1; i < 11; i++) {
-					sidenav.append($("<li>").addClass("no-padding")
-						.append($("<a>").addClass("menuItems participant")
-						.attr("id", "example" + i).text("Example " + i)));
-				}
+				exports.sideNavInitial(1, null);
 			}
 			else if(id.split("example")[0] == "") {
 				router.navigate("example", {num: id.split("example")[1]});
 			}
-			else if(id == "config") {
-				var indicator = 1,
-					mag1 = 0,
-					mag2 = 0;
-				for(var i = 1; i < 8; i++) {
-					if(String($("#variable" + i).val()).length == 0) {
-						if(i == 3) {
-							if(!$("#innerInf").is(":checked")) {
-								indicator = 0;
-							}
-						}
-						else if(i == 4) {
-							if(!$("#outerInf").is(":checked")) {
-								indicator = 0;
-							}
-						}
-						else {
-							indicator = 0;
-						}
-					}
-				}
-				if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
-				if(indicator == 1) {
-					$("#innerInf").is(":checked") == true ? mag1 = "Inf"
-						: mag1 = $("#variable3").val();
-					$("#outerInf").is(":checked") == true ? mag2 = "Inf"
-						: mag2 = $("#variable4").val();
-					router.navigate("mod", {
-						hor: $("#variable1").val(),
-						ver: $("#variable2").val(),
-						inner: mag1,
-						outer: mag2,
-						theta: $("#variable5").val(),
-						phi: $("#variable6").val(),
-						iter: $("#variable7").val(),
-					});
-				}
-				else if(parseInt($("#variable7").val()) < 1) {
-					alert("The number of iterations must be a positive integer!");
-				}
-				else {
-					alert("All of the requested information is necessary! Please " +
-						"fill in whatever data is missing and submit again.");
-				}
-			}
 		});
+	};
+
+
+
+	exports.sideNavInitial = function(ver, selected) {
+		var sidenav = $("#slide-out");
+		sidenav.empty();
+		if(ver == 0) {
+			sidenav.append(
+				$("<li>").addClass("no-padding").append(
+					$("<a>").attr("id", "home").addClass("menuItems").text("Home")
+				),
+				$("<li>").addClass("no-padding").append(
+					$("<a>").attr("id", "change").addClass("menuItems").text("Elliptical Table")
+				),
+				$("<li>").addClass("divider"),
+				$("<li>").addClass("no-padding").append(
+					$("<a>").attr("id", "examples").addClass("menuItems").text("Examples").append(
+						$("<i>").addClass("material-icons right").text("arrow_forward")
+					)
+				)
+			);
+		}
+		else if(ver == 1) {
+			sidenav.append(
+				$("<li>").addClass("no-padding").append(
+					$("<a>").addClass("menuItems")
+					.attr("id", "mainMenu").text("Main Menu").append(
+						$("<i>").addClass("material-icons left")
+						.css("padding-right", "30px").text("arrow_backward"))),
+				$("<li>").addClass("divider")
+			);
+			for(var i = 1; i < 11; i++) {
+				sidenav.append(
+					$("<li>").addClass("no-padding").append(
+						$("<a>").addClass("menuItems")
+						.attr("id", "example" + i).text("Example " + i)
+					)
+				);
+			}
+		}
+		if(selected != null) {
+			$("#" + selected).parent().css("background-color", "#CFE4E4");
+		}
 	};
 
 
