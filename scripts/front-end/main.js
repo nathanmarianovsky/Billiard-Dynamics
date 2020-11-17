@@ -6,9 +6,11 @@ define(["jquery", "materialize", "router5", "mathjax", "math", "Plotly", "app/ro
 		});
 		var router = new router5.Router5([
 			new router5.RouteNode("def", "/"),
-			new router5.RouteNode("config", "/config"),
+			new router5.RouteNode("configEllipse", "/configEllipse"),
+			new router5.RouteNode("configRectangle", "/configRectangle"),
 			new router5.RouteNode("example", "/example?:num"),
-			new router5.RouteNode("ellipse", "/ellipse?:hor&:ver&:inner&:outer&:theta&:phi&:iter")
+			new router5.RouteNode("ellipse", "/ellipse?:hor&:ver&:inner&:outer&:theta&:phi&:iter"),
+			new router5.RouteNode("rectangle", "/rectangle?:hor&:ver&:inner&:outer&:horPoint&:verPoint&:phi&:iter")
 		],{
 			defaultRoute: "def"
 		});

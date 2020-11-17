@@ -12,8 +12,11 @@ define(["jquery", "math"], ($, math) => {
 			else if(id == "home") {
 				router.navigate("def");
 			}
-			else if(id == "change") {
-				router.navigate("config");
+			else if(id == "changeEllipse") {
+				router.navigate("configEllipse");
+			}
+			else if(id == "changeRectangle") {
+				router.navigate("configRectangle");
 			}
 			else if(id == "mainMenu") {
 				exports.sideNavInitial(0, null);
@@ -30,50 +33,95 @@ define(["jquery", "math"], ($, math) => {
 
 
 	// Handles the configuration button for the case of the elliptical table
-	exports.ellipticalConfig = function(router) {
+	exports.config = function(router, table) {
 		$("#config").on("click", function(e) {
 			var indicator = 1,
 				mag1 = 0,
 				mag2 = 0;
-			for(var i = 1; i < 8; i++) {
-				if(String($("#variable" + i).val()).length == 0) {
-					if(i == 3) {
-						if(!$("#innerInf").is(":checked")) {
+			if(table == "ellipse") {
+				for(var i = 1; i < 8; i++) {
+					if(String($("#variable" + i).val()).length == 0) {
+						if(i == 3) {
+							if(!$("#innerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else if(i == 4) {
+							if(!$("#outerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else {
 							indicator = 0;
 						}
-					}
-					else if(i == 4) {
-						if(!$("#outerInf").is(":checked")) {
-							indicator = 0;
-						}
-					}
-					else {
-						indicator = 0;
 					}
 				}
+				if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
+				if(indicator == 1) {
+					$("#innerInf").is(":checked") == true ? mag1 = "Inf"
+						: mag1 = $("#variable3").val();
+					$("#outerInf").is(":checked") == true ? mag2 = "Inf"
+						: mag2 = $("#variable4").val();
+					router.navigate("ellipse", {
+						hor: $("#variable1").val(),
+						ver: $("#variable2").val(),
+						inner: mag1,
+						outer: mag2,
+						theta: $("#variable5").val(),
+						phi: $("#variable6").val(),
+						iter: $("#variable7").val(),
+					});
+				}
+				else if(parseInt($("#variable7").val()) < 1) {
+					alert("The number of iterations must be a positive integer!");
+				}
+				else {
+					alert("All of the requested information is necessary! Please " +
+						"fill in whatever data is missing and submit again.");
+				}
 			}
-			if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
-			if(indicator == 1) {
-				$("#innerInf").is(":checked") == true ? mag1 = "Inf"
-					: mag1 = $("#variable3").val();
-				$("#outerInf").is(":checked") == true ? mag2 = "Inf"
-					: mag2 = $("#variable4").val();
-				router.navigate("ellipse", {
-					hor: $("#variable1").val(),
-					ver: $("#variable2").val(),
-					inner: mag1,
-					outer: mag2,
-					theta: $("#variable5").val(),
-					phi: $("#variable6").val(),
-					iter: $("#variable7").val(),
-				});
-			}
-			else if(parseInt($("#variable7").val()) < 1) {
-				alert("The number of iterations must be a positive integer!");
-			}
-			else {
-				alert("All of the requested information is necessary! Please " +
-					"fill in whatever data is missing and submit again.");
+			else if(table == "rectangle") {
+				for(var i = 1; i < 9; i++) {
+					if(String($("#variable" + i).val()).length == 0) {
+						if(i == 3) {
+							if(!$("#innerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else if(i == 4) {
+							if(!$("#outerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else {
+							indicator = 0;
+						}
+					}
+				}
+				if(parseInt($("#variable8").val()) < 1) { indicator = 0; }
+				if(indicator == 1) {
+					$("#innerInf").is(":checked") == true ? mag1 = "Inf"
+						: mag1 = $("#variable3").val();
+					$("#outerInf").is(":checked") == true ? mag2 = "Inf"
+						: mag2 = $("#variable4").val();
+					router.navigate("rectangle", {
+						hor: $("#variable1").val(),
+						ver: $("#variable2").val(),
+						inner: mag1,
+						outer: mag2,
+						horPoint: $("#variable5").val(),
+						verPoint: $("#variable6").val(),
+						phi: $("#variable7").val(),
+						iter: $("#variable8").val(),
+					});
+				}
+				else if(parseInt($("#variable8").val()) < 1) {
+					alert("The number of iterations must be a positive integer!");
+				}
+				else {
+					alert("All of the requested information is necessary! Please " +
+						"fill in whatever data is missing and submit again.");
+				}
 			}
 		});
 	};
@@ -90,7 +138,10 @@ define(["jquery", "math"], ($, math) => {
 					$("<a>").attr("id", "home").addClass("menuItems").text("Home")
 				),
 				$("<li>").addClass("no-padding").append(
-					$("<a>").attr("id", "change").addClass("menuItems").text("Elliptical Table")
+					$("<a>").attr("id", "changeEllipse").addClass("menuItems").text("Elliptical Table")
+				),
+				$("<li>").addClass("no-padding").append(
+					$("<a>").attr("id", "changeRectangle").addClass("menuItems").text("Rectangular Table")
 				),
 				$("<li>").addClass("divider"),
 				$("<li>").addClass("no-padding").append(
@@ -209,32 +260,54 @@ define(["jquery", "math"], ($, math) => {
 
 
 
+	// Checks whether a given point is outside the rectangle
+	exports.checkRegionRectangle = function(info, xLength, yLength) {
+		return math.abs(info.x) > xLength || math.abs(info.y) > yLength ? 1 : 0;
+	};
+
+
+
 	// Records the points attained along a non-magnetic trajectory inside the ellipse
-	exports.plotting = function(point, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver) {
+	exports.plotting = function(point, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver, table) {
 		if(ver == 0) {
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 				point.x, point.y, point.v_x, point.v_y);
-			if(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
-				check = exports.evaluateTrajectoryStep(math.pow(10, -4),
-						point.x, point.y, point.v_x, point.v_y);
-				iterX.push(check.x);
-				iterY.push(check.y);
-				while(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
+			if(table == "ellipse") {
+				if(exports.checkRegionEllipse(check, xLength, yLength) == 0) {
 					check = exports.evaluateTrajectoryStep(math.pow(10, -4),
-						check.x, check.y, check.v_x, check.v_y);
+							point.x, point.y, point.v_x, point.v_y);
 					iterX.push(check.x);
 					iterY.push(check.y);
+					if(table == "ellipse") {
+						while(exports.checkRegionEllipse(check, xLength, yLength) == 0) {
+							check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+								check.x, check.y, check.v_x, check.v_y);
+							iterX.push(check.x);
+							iterY.push(check.y);
+						}
+					}
+					else if(table == "rectangle") {
+						while(exports.checkRegionRectangle(check, xLength, yLength) == 0) {
+							check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+								check.x, check.y, check.v_x, check.v_y);
+							iterX.push(check.x);
+							iterY.push(check.y);
+						}
+					}
 				}
+				if(outerMagneticField == Infinity) {
+					point = exports.evaluateTrajectory(point.x, point.y,
+						point.v_x, point.v_y, xLength, yLength);
+					iterX.push(point.x);
+					iterY.push(point.y);
+					point = exports.reflectTrajectory(point.x, point.y,
+						point.v_x, point.v_y, xLength, yLength);
+				}
+				else { point = check; }
 			}
-			if(outerMagneticField == Infinity) {
-				point = exports.evaluateTrajectory(point.x, point.y,
-					point.v_x, point.v_y, xLength, yLength);
-				iterX.push(point.x);
-				iterY.push(point.y);
-				point = exports.reflectTrajectory(point.x, point.y,
-					point.v_x, point.v_y, xLength, yLength);
+			else if(table == "rectangle") {
+
 			}
-			else { point = check; }
 		}
 		else if(ver == 1) {
 			var reverseArrX = [],
@@ -248,9 +321,17 @@ define(["jquery", "math"], ($, math) => {
 			var max = math.max(xLength, yLength);
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 					pointIter.x, pointIter.y, pointIter.v_x, pointIter.v_y);
-			if(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
-				pointIter.v_x *= -1;
-				pointIter.v_y *= -1;
+			if(table == "ellipse") {
+				if(exports.checkRegionEllipse(check, xLength, yLength) == 0) {
+					pointIter.v_x *= -1;
+					pointIter.v_y *= -1;
+				}
+			}
+			else if(table == "rectangle") {
+				if(exports.checkRegionRectangle(check, xLength, yLength) == 0) {
+					pointIter.v_x *= -1;
+					pointIter.v_y *= -1;
+				}	
 			}
 			while((-(max + scale) <= pointIter.x) && (pointIter.x <= max + scale)
 				&& (-(max + scale) <= pointIter.y) && (pointIter.y <= max + scale)) {
@@ -284,9 +365,17 @@ define(["jquery", "math"], ($, math) => {
 			else {
 				check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 					point.x, point.y, point.v_x, point.v_y);
-				if(exports.checkRegionEllipse(check, xLength, yLength, math) == 1) {
-					point.v_x *= -1;
-					point.v_y *= -1;
+				if(table == "ellipse") {
+					if(exports.checkRegionEllipse(check, xLength, yLength) == 1) {
+						point.v_x *= -1;
+						point.v_y *= -1;
+					}
+				}
+				else if(table == "rectangle") {
+					if(exports.checkRegionRectangle(check, xLength, yLength) == 1) {
+						point.v_x *= -1;
+						point.v_y *= -1;
+					}
 				}
 			}
 		}
@@ -296,7 +385,7 @@ define(["jquery", "math"], ($, math) => {
 
 
 	// Records the points attained along a magnetic trajectory in the plane
-	exports.magneticPlotting = function(point, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver) {
+	exports.magneticPlotting = function(point, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver, table) {
 		var coefficientList = [point.x, point.v_x, point.y, point.v_y],
 			param = 0,
 			steps = 0,
@@ -311,32 +400,63 @@ define(["jquery", "math"], ($, math) => {
 			var check = exports.evaluateMagneticTrajectory(indexArr[i],
 				coefficientList[0], coefficientList[1], coefficientList[2],
 				coefficientList[3], scaling);
-			if(exports.checkRegionEllipse(check, xLength, yLength, math) == ver) { sum++; }
+			if(table == "ellipse") {
+				if(exports.checkRegionEllipse(check, xLength, yLength) == ver) { sum++; }
+			}
+			else if(table == "rectangle") {
+				if(exports.checkRegionRectangle(check, xLength, yLength) == ver) { sum++; }
+			}
 		}
 		if(sum > 1) {
 			point = check;
-			while(exports.checkRegionEllipse(point, xLength, yLength, math) == ver) {
-				if(steps >= bound) { break; }
-				else { steps++; }
-				param += index;
-				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
-					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
-				iterX.push(point.x);
-				iterY.push(point.y);
+			if(table == "ellipse") {
+				while(exports.checkRegionEllipse(point, xLength, yLength) == ver) {
+					if(steps >= bound) { break; }
+					else { steps++; }
+					param += index;
+					point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+						coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+					iterX.push(point.x);
+					iterY.push(point.y);
+				}
+			}
+			else if(table == "rectangle") {
+				while(exports.checkRegionRectangle(point, xLength, yLength) == ver) {
+					if(steps >= bound) { break; }
+					else { steps++; }
+					param += index;
+					point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+						coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+					iterX.push(point.x);
+					iterY.push(point.y);
+				}
 			}
 		}
 		else {
 			point = exports.evaluateMagneticTrajectory(-indexArr[4],
 				coefficientList[0], coefficientList[1], coefficientList[2],
 				coefficientList[3], scaling);
-			while(exports.checkRegionEllipse(point, xLength, yLength, math) == ver) {
-				if(steps >= bound) { break; }
-				else { steps++; }
-				param -= index;
-				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
-					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
-				iterX.push(point.x);
-				iterY.push(point.y);
+			if(table == "ellipse") {
+				while(exports.checkRegionEllipse(point, xLength, yLength) == ver) {
+					if(steps >= bound) { break; }
+					else { steps++; }
+					param -= index;
+					point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+						coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+					iterX.push(point.x);
+					iterY.push(point.y);
+				}
+			}
+			else if(table == "rectangle") {
+				while(exports.checkRegionRectangle(point, xLength, yLength) == ver) {
+					if(steps >= bound) { break; }
+					else { steps++; }
+					param -= index;
+					point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+						coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+					iterX.push(point.x);
+					iterY.push(point.y);
+				}
 			}
 		}
 		if(outerMagneticField == Infinity && ver == 0) {
