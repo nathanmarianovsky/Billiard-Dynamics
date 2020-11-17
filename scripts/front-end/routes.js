@@ -34,6 +34,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 					$.get("/client/main.html").done(function(primary) {
 						main.append(primary);
 						functions.handle_links(router);
+						functions.ellipticalConfig(router);
 						functions.messageHandler(0);
 						$("select").material_select();
 						Materialize.updateTextFields();
@@ -141,14 +142,15 @@ define(["jquery", "app/functions"], ($, functions) => {
 						main.append(bdy);
 					}
 					$("select").material_select();
-					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 					functions.handle_links(router);
+					functions.ellipticalConfig(router);
+					MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
 				});
 			});
 		});
 
-		// This route takes in initial conditions and provides a visual of the trajectory
-		router.addRouteListener("mod", (toState, fromState) => {
+		// This route takes in initial conditions and provides a visual of the trajectory for an elliptical table
+		router.addRouteListener("ellipse", (toState, fromState) => {
 			var main = $("main");
 			main.empty();
 			functions.sideNavInitial(0, "change");
@@ -210,6 +212,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							a = math.abs(parseFloat(toState.params.hor)),
 							b = math.abs(parseFloat(toState.params.ver)),
 							max = math.max(a,b),
+							iterations = parseInt(toState.params.iter),
 							param = 0,
 							steps = 0,
 							stop = 0,
@@ -274,12 +277,12 @@ define(["jquery", "app/functions"], ($, functions) => {
 								(math.pow(b, 2) * math.pow(math.sin(t), 2)));
 						};
 
-						for(var i = 0; i < parseInt(toState.params.iter); i++) {
+						for(var i = 0; i < iterations; i++) {
 							// Inner Dynamics
 							if(innerMagneticField != Infinity) {
-								check = functions.evaluateTrajectoryStep(math.pow(10, -3),
+								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 									point.x, point.y, point.v_x, point.v_y);
-								if(functions.checkRegion(check, a, b) == 1) {
+								if(functions.checkRegionEllipse(check, a, b) == 1) {
 									point.v_x *= -1;
 									point.v_y *= -1;
 								}
@@ -299,7 +302,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							if(outerMagneticField != Infinity) {
 								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 									point.x, point.y, point.v_x, point.v_y);
-								if(functions.checkRegion(check, a, b) == 0) {
+								if(functions.checkRegionEllipse(check, a, b) == 0) {
 									point.v_x *= -1;
 									point.v_y *= -1;
 								}
@@ -316,7 +319,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 								if(innerMagneticField != Infinity) {
 									check = functions.evaluateTrajectoryStep(math.pow(10, -2),
 										point.x, point.y, point.v_x, point.v_y);
-									if(functions.checkRegion(check, a, b) == 1) {
+									if(functions.checkRegionEllipse(check, a, b) == 1) {
 										point.v_x *= -1;
 										point.v_y *= -1;
 									}
@@ -378,80 +381,113 @@ define(["jquery", "app/functions"], ($, functions) => {
 						var data = [trace1, trace2, {x: [], y: []}],
 							dataBirk = [trace3];
 
-						var layout = {
-						  	grid: {rows: 1, columns: 1, pattern: "independent"},
-						  	showlegend: false,
-						  	xaxis: {
-						  		range: [-(max + scaleFactor), max + scaleFactor],
-						  		title: "$x-\\text{axis}$",
-							    showticklabels: true,
-							    tickangle: "auto",
-							    exponentformat: "e",
-							    showexponent: "all"
-						  	},
-				  			yaxis: {
-				  				range: [-(max + scaleFactor), max + scaleFactor],
-				  				title: "$y-\\text{axis}$",
-							    showticklabels: true,
-							    tickangle: "auto",
-							    exponentformat: "e",
-							    showexponent: "all"
-				  			},
-				  			title: "Particle Trajectory",
-				  			updatemenus: [{
-							      	x: 0,
-							      	y: 1,
-							      	yanchor: "bottom",
-							      	xanchor: "left",
-							      	showactive: false,
-							      	direction: "right",
-							      	type: "buttons",
-							      	pad: {b: 0, l: 180},
-							      	buttons: [{
-							        	method: "animate",
-							        	args: [null, {
-							          		mode: "immediate",
-							          		fromcurrent: true,
-							          		transition: {duration: 1},
-							          		frame: {duration: 100, redraw: false}
-					        			}
-				        			],
-							        label: "Play"
-						      	}, {
-								        method: 'animate',
-								        args: [[null], {
-								          	mode: "immediate",
-								          	transition: {duration: 0},
-								          	frame: {duration: 0, redraw: false}
-								        }
-						        	],
-							        label: "Pause"
-					      		}, {
-							        	method: "animate",
-							        	args: [null, {
-							          		mode: "immediate",
-							          		fromcurrent: false,
-							          		transition: {duration: 1},
-							          		frame: {duration: 100, redraw: false}
-							        	}
-						        	],
-							        label: "Restart"
-						      	}]
-				      		}]
-						};
+						if(iterations <= 200) {
+							var layout = {
+							  	grid: {rows: 1, columns: 1, pattern: "independent"},
+							  	showlegend: false,
+							  	xaxis: {
+							  		range: [-(max + scaleFactor), max + scaleFactor],
+							  		title: "$x-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+							  	},
+					  			yaxis: {
+					  				range: [-(max + scaleFactor), max + scaleFactor],
+					  				title: "$y-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+					  			},
+					  			title: "Particle Trajectory",
+					  			updatemenus: [{
+								      	x: 0,
+								      	y: 1,
+								      	yanchor: "bottom",
+								      	xanchor: "left",
+								      	showactive: false,
+								      	direction: "right",
+								      	type: "buttons",
+								      	pad: {b: 0, l: 180},
+								      	buttons: [{
+								        	method: "animate",
+								        	args: [null, {
+								          		mode: "immediate",
+								          		fromcurrent: true,
+								          		transition: {duration: 1},
+								          		frame: {duration: 100, redraw: false}
+						        			}
+					        			],
+								        label: "Play"
+							      	}, {
+									        method: 'animate',
+									        args: [[null], {
+									          	mode: "immediate",
+									          	transition: {duration: 0},
+									          	frame: {duration: 0, redraw: false}
+									        }
+							        	],
+								        label: "Pause"
+						      		}, {
+								        	method: "animate",
+								        	args: [null, {
+								          		mode: "immediate",
+								          		fromcurrent: false,
+								          		transition: {duration: 1},
+								          		frame: {duration: 100, redraw: false}
+								        	}
+							        	],
+								        label: "Restart"
+							      	}]
+					      		}]
+							};
+						}
+						else {
+							var layout = {
+							  	grid: {rows: 1, columns: 1, pattern: "independent"},
+							  	showlegend: false,
+							  	xaxis: {
+							  		range: [-(max + scaleFactor), max + scaleFactor],
+							  		title: "$x-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+							  	},
+					  			yaxis: {
+					  				range: [-(max + scaleFactor), max + scaleFactor],
+					  				title: "$y-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+					  			},
+					  			title: "Particle Trajectory"
+							};
+						}
+
 
 						var layoutBirk = {
 						  	grid: {rows: 1, columns: 1, pattern: "independent"},
 						  	showlegend: false,
 						  	xaxis: {
 						  		range: [0, 2.05 * Math.PI * max],
-						  		title: "$\\text{Arc Length with Starting Position at }($" + a + "$,0)$",
+						  		title: "$\\text{Arc Length}$",
 							    showticklabels: true,
 							    tickangle: "auto",
 							    exponentformat: "e",
 							    showexponent: "all"
 						  	},
-				  			yaxis: {range: [-1.05, 1.05]},
+				  			yaxis: {
+				  				range: [-1.05, 1.05],
+				  				title: "$\\cos(\\varphi)$",
+							    showticklabels: true,
+							    tickangle: "auto",
+							    exponentformat: "e",
+							    showexponent: "all"
+				  			},
 				  			title: "Birkhoff Coordinates"
 						};
 
@@ -465,39 +501,47 @@ define(["jquery", "app/functions"], ($, functions) => {
 						var count = 0;
 						Plotly.newPlot("trajecPhoto", data, layout, {scrollZoom: true, responsive: true})
 							.then(function() {
-								var container = [],
-									curX = [],
-									displayX = [],
-									curY = [],
-									displayY = [],
-									add = parseInt(.01 * iterX.length);
-								for(var i = 0; i < iterX.length; i += add) {
-									count++;
-									displayX = [];
-									displayY = [];
-									curX = iterX.slice(0, i);
-									curY = iterY.slice(0, i);
-									for(var j = 0; j < curX.length; j++) {
-										if(j % 50 == 0 || curX[j] == null || j == curX.length - 1) {
-											displayX.push(curX[j]);
-											displayY.push(curY[j]);
-										}
+								if(iterations <= 200) {
+									var container = [],
+										curX = [],
+										displayX = [],
+										curY = [],
+										displayY = [],
+										add = 0;
+									if(iterations < 100) {
+										add = parseInt(.01 * iterX.length);
 									}
-									container.push({
-										data: [
-											{x: arrX, y: arrY},
-											{x: displayX, y: displayY},
-											{
-												x: [displayX[displayX.length - 1]],
-												y: [displayY[displayY.length - 1]],
-												mode: "markers",
-												marker: { size: 15, color: "black" }
+									else {
+										add = parseInt(.005 * iterX.length);
+									}
+									for(var i = 0; i < iterX.length; i += add) {
+										count++;
+										displayX = [];
+										displayY = [];
+										curX = iterX.slice(0, i);
+										curY = iterY.slice(0, i);
+										for(var j = 0; j < curX.length; j++) {
+											if(j % 100 == 0 || curX[j] == null || j == curX.length - 1) {
+												displayX.push(curX[j]);
+												displayY.push(curY[j]);
 											}
-										],
-										name: "frame" + count
-									});
+										}
+										container.push({
+											data: [
+												{x: arrX, y: arrY},
+												{x: displayX, y: displayY},
+												{
+													x: [displayX[displayX.length - 1]],
+													y: [displayY[displayY.length - 1]],
+													mode: "markers",
+													marker: { size: 15, color: "black" }
+												}
+											],
+											name: "frame" + count
+										});
+									}
+									Plotly.addFrames("trajecPhoto", container);
 								}
-								Plotly.addFrames("trajecPhoto", container);
 							});
 						$("#trajecPhoto").children().first().children().first().children().first().css({
 							"border-style": "solid",
@@ -521,54 +565,10 @@ define(["jquery", "app/functions"], ($, functions) => {
 						$(".button-collapse").sideNav({ "menuWidth": "350px" });
 						main.css("margin-bottom", "60px");
 						functions.handle_links(router);
+						functions.ellipticalConfig(router);
 						$("select").material_select();
 						Materialize.updateTextFields();
 						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
-						$("#config").on("click", function(e) {
-							var indicator = 1,
-								mag1 = 0,
-								mag2 = 0;
-							for(var i = 1; i < 8; i++) {
-								if(String($("#variable" + i).val()).length == 0) {
-									if(i == 3) {
-										if(!$("#innerInf").is(":checked")) {
-											indicator = 0;
-										}
-									}
-									else if(i == 4) {
-										if(!$("#outerInf").is(":checked")) {
-											indicator = 0;
-										}
-									}
-									else {
-										indicator = 0;
-									}
-								}
-							}
-							if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
-							if(indicator == 1) {
-								$("#innerInf").is(":checked") == true ? mag1 = "Inf"
-									: mag1 = $("#variable3").val();
-								$("#outerInf").is(":checked") == true ? mag2 = "Inf"
-									: mag2 = $("#variable4").val();
-								router.navigate("mod", {
-									hor: $("#variable1").val(),
-									ver: $("#variable2").val(),
-									inner: mag1,
-									outer: mag2,
-									theta: $("#variable5").val(),
-									phi: $("#variable6").val(),
-									iter: $("#variable7").val(),
-								});
-							}
-							else if(parseInt($("#variable7").val()) < 1) {
-								alert("The number of iterations must be a positive integer!");
-							}
-							else {
-								alert("All of the requested information is necessary! Please " +
-									"fill in whatever data is missing and submit again.");
-							}
-						});
 					});
 				});
 			});

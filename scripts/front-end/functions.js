@@ -12,7 +12,7 @@ define(["jquery", "math"], ($, math) => {
 			else if(id == "home") {
 				router.navigate("def");
 			}
-			else if(id == "configuration") {
+			else if(id == "change") {
 				router.navigate("config");
 			}
 			else if(id == "mainMenu") {
@@ -29,6 +29,58 @@ define(["jquery", "math"], ($, math) => {
 
 
 
+	// Handles the configuration button for the case of the elliptical table
+	exports.ellipticalConfig = function(router) {
+		$("#config").on("click", function(e) {
+			var indicator = 1,
+				mag1 = 0,
+				mag2 = 0;
+			for(var i = 1; i < 8; i++) {
+				if(String($("#variable" + i).val()).length == 0) {
+					if(i == 3) {
+						if(!$("#innerInf").is(":checked")) {
+							indicator = 0;
+						}
+					}
+					else if(i == 4) {
+						if(!$("#outerInf").is(":checked")) {
+							indicator = 0;
+						}
+					}
+					else {
+						indicator = 0;
+					}
+				}
+			}
+			if(parseInt($("#variable7").val()) < 1) { indicator = 0; }
+			if(indicator == 1) {
+				$("#innerInf").is(":checked") == true ? mag1 = "Inf"
+					: mag1 = $("#variable3").val();
+				$("#outerInf").is(":checked") == true ? mag2 = "Inf"
+					: mag2 = $("#variable4").val();
+				router.navigate("ellipse", {
+					hor: $("#variable1").val(),
+					ver: $("#variable2").val(),
+					inner: mag1,
+					outer: mag2,
+					theta: $("#variable5").val(),
+					phi: $("#variable6").val(),
+					iter: $("#variable7").val(),
+				});
+			}
+			else if(parseInt($("#variable7").val()) < 1) {
+				alert("The number of iterations must be a positive integer!");
+			}
+			else {
+				alert("All of the requested information is necessary! Please " +
+					"fill in whatever data is missing and submit again.");
+			}
+		});
+	};
+
+
+
+	// Provides an initial load of the sidenav content
 	exports.sideNavInitial = function(ver, selected) {
 		var sidenav = $("#slide-out");
 		sidenav.empty();
@@ -151,7 +203,7 @@ define(["jquery", "math"], ($, math) => {
 
 
 	// Checks whether a given point is outside the ellipse
-	exports.checkRegion = function(info, xLength, yLength) {
+	exports.checkRegionEllipse = function(info, xLength, yLength) {
 		return math.pow(info.x / xLength, 2) + math.pow(info.y / yLength, 2) > 1 ? 1 : 0;
 	};
 
@@ -162,12 +214,12 @@ define(["jquery", "math"], ($, math) => {
 		if(ver == 0) {
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 				point.x, point.y, point.v_x, point.v_y);
-			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
+			if(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
 				check = exports.evaluateTrajectoryStep(math.pow(10, -4),
 						point.x, point.y, point.v_x, point.v_y);
 				iterX.push(check.x);
 				iterY.push(check.y);
-				while(exports.checkRegion(check, xLength, yLength, math) == 0) {
+				while(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
 					check = exports.evaluateTrajectoryStep(math.pow(10, -4),
 						check.x, check.y, check.v_x, check.v_y);
 					iterX.push(check.x);
@@ -196,7 +248,7 @@ define(["jquery", "math"], ($, math) => {
 			var max = math.max(xLength, yLength);
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 					pointIter.x, pointIter.y, pointIter.v_x, pointIter.v_y);
-			if(exports.checkRegion(check, xLength, yLength, math) == 0) {
+			if(exports.checkRegionEllipse(check, xLength, yLength, math) == 0) {
 				pointIter.v_x *= -1;
 				pointIter.v_y *= -1;
 			}
@@ -232,7 +284,7 @@ define(["jquery", "math"], ($, math) => {
 			else {
 				check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 					point.x, point.y, point.v_x, point.v_y);
-				if(exports.checkRegion(check, xLength, yLength, math) == 1) {
+				if(exports.checkRegionEllipse(check, xLength, yLength, math) == 1) {
 					point.v_x *= -1;
 					point.v_y *= -1;
 				}
@@ -251,18 +303,19 @@ define(["jquery", "math"], ($, math) => {
 			index = 0,
 			sum = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3.697),
+			index = math.pow(10, -3.6),
+			// index = math.pow(10, -3.697),
 			indexArr = [math.pow(10, -2.5), math.pow(10, -3.2), 
 				math.pow(10, -3.8), math.pow(10, -4.5), math.pow(10, -3.5)];
 		for(var i = 0; i < 5; i++) {
 			var check = exports.evaluateMagneticTrajectory(indexArr[i],
 				coefficientList[0], coefficientList[1], coefficientList[2],
 				coefficientList[3], scaling);
-			if(exports.checkRegion(check, xLength, yLength, math) == ver) { sum++; }
+			if(exports.checkRegionEllipse(check, xLength, yLength, math) == ver) { sum++; }
 		}
 		if(sum > 1) {
 			point = check;
-			while(exports.checkRegion(point, xLength, yLength, math) == ver) {
+			while(exports.checkRegionEllipse(point, xLength, yLength, math) == ver) {
 				if(steps >= bound) { break; }
 				else { steps++; }
 				param += index;
@@ -273,7 +326,10 @@ define(["jquery", "math"], ($, math) => {
 			}
 		}
 		else {
-			while(exports.checkRegion(point, xLength, yLength, math) == ver) {
+			point = exports.evaluateMagneticTrajectory(-indexArr[4],
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling);
+			while(exports.checkRegionEllipse(point, xLength, yLength, math) == ver) {
 				if(steps >= bound) { break; }
 				else { steps++; }
 				param -= index;
