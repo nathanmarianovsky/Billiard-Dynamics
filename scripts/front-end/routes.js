@@ -596,21 +596,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 			});
 		});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		// This route takes in initial conditions and provides a visual of the trajectory for a rectangular table
 		router.addRouteListener("rectangle", (toState, fromState) => {
 			var main = $("main");
@@ -790,21 +775,22 @@ define(["jquery", "app/functions"], ($, functions) => {
 								}
 							}
 
-							phi = math.acos(point.x / a);
+							// phi = math.acos(point.x / a);
 
-							if(point.x == 0 && point.y == b) { phi = 0; }
-							else if(point.x == 0 && point.y == -b) { phi = Math.PI; }
-							else if(point.x < 0 && point.y < 0) {
-								phi += 2 * (Math.PI - phi);
-							}
-							else if(point.x > 0 && point.y < 0) {
-								phi = math.asin(point.y / b) + (2 * Math.PI);
-							}
+							// if(point.x == 0 && point.y == b) { phi = 0; }
+							// else if(point.x == 0 && point.y == -b) { phi = Math.PI; }
+							// else if(point.x < 0 && point.y < 0) {
+							// 	phi += 2 * (Math.PI - phi);
+							// }
+							// else if(point.x > 0 && point.y < 0) {
+							// 	phi = math.asin(point.y / b) + (2 * Math.PI);
+							// }
 
-							arrBirkX.push(functions.riemannSum(funcArclength, 0, phi, math.pow(10, 4)));
-							arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
-								{x: -a * (point.y / b), y: b * (point.x / a)})
-								/ math.sqrt(math.pow(a * (point.y / b), 2) + math.pow(b * (point.x / a), 2)));
+							// arrBirkX.push(functions.riemannSum(funcArclength, 0, phi, math.pow(10, 4)));
+							// arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
+							// 	{x: -a * (point.y / b), y: b * (point.x / a)})
+							// 	/ math.sqrt(math.pow(a * (point.y / b), 2) + math.pow(b * (point.x / a), 2)));
+
 						}
 
 						// Plotting Data
@@ -812,22 +798,22 @@ define(["jquery", "app/functions"], ($, functions) => {
 						var arrX = [],
 							arrY = [];
 
-						for(var i = 0; i <= 2 * a; i += 0.01) {
+						for(var i = 0; i <= 2 * a; i += 0.001) {
 							arrX.push(-a + i);
 							arrY.push(b);
 						}
 
-						for(var i = 0; i <= 2 * b; i += 0.01) {
+						for(var i = 0; i <= 2 * b; i += 0.001) {
 							arrX.push(a);
 							arrY.push(b - i);
 						}
 
-						for(var i = 0; i <= 2 * a; i += 0.01) {
+						for(var i = 0; i <= 2 * a; i += 0.001) {
 							arrX.push(a - i);
 							arrY.push(-b);
 						}
 
-						for(var i = 0; i <= 2 * b; i += 0.01) {
+						for(var i = 0; i <= 2 * b; i += 0.001) {
 							arrX.push(-a);
 							arrY.push(-b + i);
 						}
@@ -865,7 +851,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							  	showlegend: false,
 							  	xaxis: {
 							  		range: [-(max + scaleFactor), max + scaleFactor],
-							  		title: "$x-\\text{axis}$",
+							  		title: "$\\mathbf{x}_1-\\text{axis}$",
 								    showticklabels: true,
 								    tickangle: "auto",
 								    exponentformat: "e",
@@ -873,7 +859,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							  	},
 					  			yaxis: {
 					  				range: [-(max + scaleFactor), max + scaleFactor],
-					  				title: "$y-\\text{axis}$",
+					  				title: "$\\mathbf{x}_2-\\text{axis}$",
 								    showticklabels: true,
 								    tickangle: "auto",
 								    exponentformat: "e",
@@ -928,7 +914,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							  	showlegend: false,
 							  	xaxis: {
 							  		range: [-(max + scaleFactor), max + scaleFactor],
-							  		title: "$x-\\text{axis}$",
+							  		title: "$\\mathbf{x}_1-\\text{axis}$",
 								    showticklabels: true,
 								    tickangle: "auto",
 								    exponentformat: "e",
@@ -936,7 +922,7 @@ define(["jquery", "app/functions"], ($, functions) => {
 							  	},
 					  			yaxis: {
 					  				range: [-(max + scaleFactor), max + scaleFactor],
-					  				title: "$y-\\text{axis}$",
+					  				title: "$\\mathbf{x}_2-\\text{axis}$",
 								    showticklabels: true,
 								    tickangle: "auto",
 								    exponentformat: "e",
@@ -1051,27 +1037,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 				});
 			});
 		});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	};
 
 	return exports;

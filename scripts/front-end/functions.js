@@ -219,7 +219,7 @@ define(["jquery", "math"], ($, math) => {
 
 
 
-	// Given a point and velocity this returns the point on the boundary along which a particle travels a straight line to reach
+	// Given a point and velocity this returns the point on the boundary of an elliptical table along which a particle travels a straight line to reach
 	exports.evaluateTrajectory = function(x_1, x_2, v_1, v_2, xLength, yLength) {
 		var value1 = (math.pow(v_1, 2) / math.pow(xLength, 2)) +
 				(math.pow(v_2, 2) / math.pow(yLength, 2)),
@@ -228,8 +228,7 @@ define(["jquery", "math"], ($, math) => {
 			intersectionTime = (-2 * value2) / value1,
 			firstComponent = (intersectionTime * v_1) + x_1,
 			secondComponent = (intersectionTime * v_2) + x_2
-		return {x: firstComponent, y: secondComponent,
-			v_x: v_1, v_y: v_2};
+		return {x: firstComponent, y: secondComponent, v_x: v_1, v_y: v_2};
 	};
 
 
@@ -241,14 +240,36 @@ define(["jquery", "math"], ($, math) => {
 
 
 
-	// Used to reflect a trajectory according to the law of reflection
-	exports.reflectTrajectory = function(x_1, x_2, v_1, v_2, xLength, yLength) {
+	// Used to reflect a trajectory according to the law of reflection in an elliptical table
+	exports.reflectTrajectoryEllipse = function(x_1, x_2, v_1, v_2, xLength, yLength) {
 		var comp1 = (yLength / xLength) * x_1,
 			comp2 = (xLength / yLength) * x_2,
 			norm = exports.normalizeVector({x: -comp1, y: -comp2}),
 			tmp = 2 * exports.dotProduct({x: v_1, y: v_2}, norm);
-		return {x: x_1, y: x_2, v_x: v_1 - (tmp * norm.x),
-			v_y: v_2 - (tmp * norm.y)};
+		return {x: x_1, y: x_2, v_x: v_1 - (tmp * norm.x), v_y: v_2 - (tmp * norm.y)};
+	};
+
+
+
+	// Used to reflect a trajectory according to the law of reflection in a rectangular table
+	exports.reflectTrajectoryRectangle = function(x_1, x_2, v_1, v_2, xLength, yLength) {
+		var norm = 0,
+			temp = 0,
+			epsilon = math.pow(10, -3);
+		if(math.abs(x_1 - xLength) < epsilon) {
+			norm = {x: -1, y: 0};
+		}
+		else if(math.abs(x_1 + xLength) < epsilon) {
+			norm = {x: 1, y: 0};
+		}
+		else if(math.abs(x_2 - yLength) < epsilon) {
+			norm = {x: 0, y: -1};
+		}
+		else if(math.abs(x_2 + yLength) < epsilon) {
+			norm = {x: 0, y: 1};
+		}
+		tmp = 2 * exports.dotProduct({x: v_1, y: v_2}, norm);
+		return {x: x_1, y: x_2, v_x: v_1 - (tmp * norm.x), v_y: v_2 - (tmp * norm.y)};
 	};
 
 
@@ -261,8 +282,12 @@ define(["jquery", "math"], ($, math) => {
 
 
 	// Checks whether a given point is outside the rectangle
-	exports.checkRegionRectangle = function(info, xLength, yLength) {
-		return math.abs(info.x) > xLength || math.abs(info.y) > yLength ? 1 : 0;
+	exports.checkRegionRectangle = function(info, xLength, yLength, squeeze) {
+		var delta = 0;
+		if(squeeze == 1) {
+			delta = math.pow(10, -3);
+		}
+		return math.abs(info.x) > xLength + delta || math.abs(info.y) > yLength + delta ? 1 : 0;
 	};
 
 
@@ -278,21 +303,11 @@ define(["jquery", "math"], ($, math) => {
 							point.x, point.y, point.v_x, point.v_y);
 					iterX.push(check.x);
 					iterY.push(check.y);
-					if(table == "ellipse") {
-						while(exports.checkRegionEllipse(check, xLength, yLength) == 0) {
-							check = exports.evaluateTrajectoryStep(math.pow(10, -4),
-								check.x, check.y, check.v_x, check.v_y);
-							iterX.push(check.x);
-							iterY.push(check.y);
-						}
-					}
-					else if(table == "rectangle") {
-						while(exports.checkRegionRectangle(check, xLength, yLength) == 0) {
-							check = exports.evaluateTrajectoryStep(math.pow(10, -4),
-								check.x, check.y, check.v_x, check.v_y);
-							iterX.push(check.x);
-							iterY.push(check.y);
-						}
+					while(exports.checkRegionEllipse(check, xLength, yLength) == 0) {
+						check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+							check.x, check.y, check.v_x, check.v_y);
+						iterX.push(check.x);
+						iterY.push(check.y);
 					}
 				}
 				if(outerMagneticField == Infinity) {
@@ -300,13 +315,29 @@ define(["jquery", "math"], ($, math) => {
 						point.v_x, point.v_y, xLength, yLength);
 					iterX.push(point.x);
 					iterY.push(point.y);
-					point = exports.reflectTrajectory(point.x, point.y,
+					point = exports.reflectTrajectoryEllipse(point.x, point.y,
 						point.v_x, point.v_y, xLength, yLength);
 				}
 				else { point = check; }
 			}
 			else if(table == "rectangle") {
-
+				if(exports.checkRegionRectangle(check, xLength, yLength) == 0) {
+					check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+							point.x, point.y, point.v_x, point.v_y);
+					iterX.push(check.x);
+					iterY.push(check.y);
+					while(exports.checkRegionRectangle(check, xLength, yLength) == 0) {
+						check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+							check.x, check.y, check.v_x, check.v_y);
+						iterX.push(check.x);
+						iterY.push(check.y);
+					}
+				}
+				if(outerMagneticField == Infinity) {
+					check = exports.reflectTrajectoryRectangle(check.x, check.y,
+						check.v_x, check.v_y, xLength, yLength);
+				}
+				point = check;
 			}
 		}
 		else if(ver == 1) {
@@ -340,9 +371,32 @@ define(["jquery", "math"], ($, math) => {
 				iterX.push(pointIter.x);
 				iterY.push(pointIter.y);
 			}
-			pointIter = exports.evaluateTrajectory(point.x, point.y, -point.v_x, -point.v_y,
-				xLength, yLength);
-			point = pointIter;
+			if(table == "ellipse") {
+				pointIter = exports.evaluateTrajectory(point.x, point.y, -point.v_x, -point.v_y,
+					xLength, yLength);
+				point = pointIter;	
+			}
+			else if(table == "rectangle") {
+				pointIter = exports.evaluateTrajectoryStep(math.pow(10, -4),
+						point.x, point.y, -point.v_x, -point.v_y);
+				// console.log(pointIter);
+				// console.log(exports.checkRegionRectangle(check, xLength, yLength));
+				console.log(math.abs(check.x) > xLength);
+				// console.log(math.abs(check.x));
+				// console.log(xLength);
+				console.log(math.abs(check.y) > yLength);
+				console.log(pointIter);
+				while(exports.checkRegionRectangle(pointIter, xLength, yLength, 1) == 0) {
+					// console.log("changing");
+					// console.log(pointIter);
+					pointIter = exports.evaluateTrajectoryStep(math.pow(10, -4),
+						pointIter.x, pointIter.y, pointIter.v_x, pointIter.v_y);
+				}
+				console.log(pointIter);
+				point = pointIter;
+				// reverseArrX.push(pointIter.x);
+				// reverseArrY.push(pointIter.y);
+			}
 			iterX.push(null);
 			iterY.push(null);
 			reverseArrX.push(pointIter.x);
@@ -359,8 +413,14 @@ define(["jquery", "math"], ($, math) => {
 				iterY.push(reverseArrY[reverseArrY.length - i]);
 			}
 			if(innerMagneticField == Infinity) {
-				point = exports.reflectTrajectory(point.x, point.y,
-					-point.v_x, -point.v_y, xLength, yLength);
+				if(table == "ellipse") {
+					point = exports.reflectTrajectoryEllipse(point.x, point.y,
+						-point.v_x, -point.v_y, xLength, yLength);
+				}
+				else if(table == "rectangle") {
+					point = exports.reflectTrajectoryRectangle(point.x, point.y,
+						-point.v_x, -point.v_y, xLength, yLength);
+				}
 			}
 			else {
 				check = exports.evaluateTrajectoryStep(math.pow(10, -2),
@@ -460,12 +520,24 @@ define(["jquery", "math"], ($, math) => {
 			}
 		}
 		if(outerMagneticField == Infinity && ver == 0) {
-			point = exports.reflectTrajectory(point.x, point.y,
-				point.v_x, point.v_y, xLength, yLength);
+			if(table == "ellipse") {
+				point = exports.reflectTrajectoryEllipse(point.x, point.y,
+					point.v_x, point.v_y, xLength, yLength);
+			}
+			else if(table == "rectangle") {
+				point = exports.reflectTrajectoryRectangle(point.x, point.y,
+					point.v_x, point.v_y, xLength, yLength);	
+			}
 		}
 		if(innerMagneticField == Infinity && ver == 1) {
-			point = exports.reflectTrajectory(point.x, point.y,
-				point.v_x, point.v_y, xLength, yLength);
+			if(table == "ellipse") {
+				point = exports.reflectTrajectoryEllipse(point.x, point.y,
+					point.v_x, point.v_y, xLength, yLength);
+			}
+			else if(table == "rectangle") {
+				point = exports.reflectTrajectoryRectangle(point.x, point.y,
+					point.v_x, point.v_y, xLength, yLength);
+			}
 		}
 		return point;
 	};
