@@ -28,7 +28,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 			functions.sideNavInitial(0, "changeEllipse");
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
-				$(".indicator").hide();
 				$.get("/client/ellipse.html").done(function(table) {
 					main.append(table);
 					$.get("/client/mainEllipse.html").done(function(primary) {
@@ -51,13 +50,34 @@ define(["jquery", "app/functions"], ($, functions) => {
 			functions.sideNavInitial(0, "changeRectangle");
 			$.get("/client/intro.html").done(function(intro) {
 				main.append(intro);
-				$(".indicator").hide();
 				$.get("/client/rectangle.html").done(function(table) {
 					main.append(table);
 					$.get("/client/mainRectangle.html").done(function(primary) {
 						main.append(primary);
 						functions.handle_links(router);
 						functions.config(router, "rectangle");
+						functions.messageHandler(0);
+						$("select").material_select();
+						Materialize.updateTextFields();
+						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
+					});
+				});
+			});
+		});
+
+		// This route is meant to simply be a collector of initial conditions for an annular table
+		router.addRouteListener("configAnnulus", (toState, fromState) => {
+			var main = $("main");
+			main.empty();
+			functions.sideNavInitial(0, "changeAnnulus");
+			$.get("/client/introAnnulus.html").done(function(intro) {
+				main.append(intro);
+				$.get("/client/annulus.html").done(function(table) {
+					main.append(table);
+					$.get("/client/mainAnnulus.html").done(function(primary) {
+						main.append(primary);
+						functions.handle_links(router);
+						functions.config(router, "annulus");
 						functions.messageHandler(0);
 						$("select").material_select();
 						Materialize.updateTextFields();
@@ -182,7 +202,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 					main.append(table);
 					$.get("/client/mainEllipse.html").done(function(result) {
 						main.append(result);
-						$(".indicator").hide();
 						functions.messageHandler(1);
 						$("#trajecPhoto").remove();
 						var trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
@@ -310,13 +329,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 								}
 								if(innerMagneticField == 0) {
 									point = functions.plotting(point, a, b,
-										iterX, iterY, innerMagneticField,
+										iterX, iterY, innerMagneticField, null,
 										outerMagneticField, scaleFactor, 0, "ellipse");
 								}
 								else {
 									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, innerScaling, innerMagneticField,
-										outerMagneticField, 0, "ellipse");
+										null, outerMagneticField, 0, "ellipse");
 								}
 							}
 
@@ -331,11 +350,11 @@ define(["jquery", "app/functions"], ($, functions) => {
 								if(outerMagneticField != 0) {
 									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, outerScaling, innerMagneticField,
-										outerMagneticField, 1, "ellipse");
+										null, outerMagneticField, 1, "ellipse");
 								}
 								else {
 									point = functions.plotting(point, a, b,
-										iterX, iterY, innerMagneticField,
+										iterX, iterY, innerMagneticField, null,
 										outerMagneticField, scaleFactor, 1, "ellipse");
 								}
 								if(innerMagneticField != Infinity) {
@@ -607,7 +626,6 @@ define(["jquery", "app/functions"], ($, functions) => {
 					main.append(table);
 					$.get("/client/mainRectangle.html").done(function(result) {
 						main.append(result);
-						$(".indicator").hide();
 						functions.messageHandler(1);
 						$("#trajecPhoto").remove();
 						var trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
@@ -626,24 +644,24 @@ define(["jquery", "app/functions"], ($, functions) => {
 						spinner.append(clipper1, patch, clipper2);
 						wrapper.append(spinner);
 						trajecPhoto.append(wrapper);
-						$("#Birk").remove();
-						var birk = $("<div>").attr("id", "Birk").css({
-								"display": "flex",
-								"align-items": "center",
-								"justify-content": "center"
-							}),
-							wrapper = $("<div>").addClass("preloader-wrapper big active"),
-							spinner = $("<div>").addClass("spinner-layer spinner-red-only"),
-							clipper1 = $("<div>").addClass("circle-clipper left").append(
-								$("<div>").addClass("circle")),
-							patch = $("<div>").addClass("gap-patch").append(
-								$("<div>").addClass("circle")),
-							clipper2 = $("<div>").addClass("circle-clipper right").append(
-								$("<div>").addClass("circle"));
-						spinner.append(clipper1, patch, clipper2);
-						wrapper.append(spinner);
-						birk.append(wrapper);
-						$("main").append(birk);
+						// $("#Birk").remove();
+						// var birk = $("<div>").attr("id", "Birk").css({
+						// 		"display": "flex",
+						// 		"align-items": "center",
+						// 		"justify-content": "center"
+						// 	}),
+						// 	wrapper = $("<div>").addClass("preloader-wrapper big active"),
+						// 	spinner = $("<div>").addClass("spinner-layer spinner-red-only"),
+						// 	clipper1 = $("<div>").addClass("circle-clipper left").append(
+						// 		$("<div>").addClass("circle")),
+						// 	patch = $("<div>").addClass("gap-patch").append(
+						// 		$("<div>").addClass("circle")),
+						// 	clipper2 = $("<div>").addClass("circle-clipper right").append(
+						// 		$("<div>").addClass("circle"));
+						// spinner.append(clipper1, patch, clipper2);
+						// wrapper.append(spinner);
+						// birk.append(wrapper);
+						// $("main").append(birk);
 
 						// Initial Conditions
 						var innerMagneticField = 0,
@@ -737,13 +755,13 @@ define(["jquery", "app/functions"], ($, functions) => {
 								}
 								if(innerMagneticField == 0) {
 									point = functions.plotting(point, a, b,
-										iterX, iterY, innerMagneticField,
+										iterX, iterY, innerMagneticField, null,
 										outerMagneticField, scaleFactor, 0, "rectangle");
 								}
 								else {
 									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, innerScaling, innerMagneticField,
-										outerMagneticField, 0, "rectangle");
+										null, outerMagneticField, 0, "rectangle");
 								}
 							}
 
@@ -758,11 +776,11 @@ define(["jquery", "app/functions"], ($, functions) => {
 								if(outerMagneticField != 0) {
 									point = functions.magneticPlotting(point, a, b,
 										iterX, iterY, outerScaling, innerMagneticField,
-										outerMagneticField, 1, "rectangle");
+										null, outerMagneticField, 1, "rectangle");
 								}
 								else {
 									point = functions.plotting(point, a, b,
-										iterX, iterY, innerMagneticField,
+										iterX, iterY, innerMagneticField, null,
 										outerMagneticField, scaleFactor, 1, "rectangle");
 								}
 								if(innerMagneticField != Infinity) {
@@ -1037,6 +1055,536 @@ define(["jquery", "app/functions"], ($, functions) => {
 				});
 			});
 		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		// This route takes in initial conditions and provides a visual of the trajectory for an annular table
+		router.addRouteListener("annulus", (toState, fromState) => {
+			var main = $("main");
+			main.empty();
+			functions.sideNavInitial(0, "changeAnnulus");
+			$.get("/client/introAnnulus.html").done(function(intro) {
+				main.append(intro);
+				$.get("/client/annulus.html").done(function(table) {
+					main.append(table);
+					$.get("/client/mainAnnulus.html").done(function(result) {
+						main.append(result);
+						functions.messageHandler(1);
+						$("#trajecPhoto").remove();
+						var trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
+								"display": "flex",
+								"align-items": "center",
+								"justify-content": "center"
+							}),
+							wrapper = $("<div>").addClass("preloader-wrapper big active"),
+							spinner = $("<div>").addClass("spinner-layer spinner-red-only"),
+							clipper1 = $("<div>").addClass("circle-clipper left").append(
+								$("<div>").addClass("circle")),
+							patch = $("<div>").addClass("gap-patch").append(
+								$("<div>").addClass("circle")),
+							clipper2 = $("<div>").addClass("circle-clipper right").append(
+								$("<div>").addClass("circle"));
+						spinner.append(clipper1, patch, clipper2);
+						wrapper.append(spinner);
+						trajecPhoto.append(wrapper);
+						// $("#Birk").remove();
+						// var birk = $("<div>").attr("id", "Birk").css({
+						// 		"display": "flex",
+						// 		"align-items": "center",
+						// 		"justify-content": "center"
+						// 	}),
+						// 	wrapper = $("<div>").addClass("preloader-wrapper big active"),
+						// 	spinner = $("<div>").addClass("spinner-layer spinner-red-only"),
+						// 	clipper1 = $("<div>").addClass("circle-clipper left").append(
+						// 		$("<div>").addClass("circle")),
+						// 	patch = $("<div>").addClass("gap-patch").append(
+						// 		$("<div>").addClass("circle")),
+						// 	clipper2 = $("<div>").addClass("circle-clipper right").append(
+						// 		$("<div>").addClass("circle"));
+						// spinner.append(clipper1, patch, clipper2);
+						// wrapper.append(spinner);
+						// birk.append(wrapper);
+						// $("main").append(birk);
+
+						// Initial Conditions
+						var innerMagneticField = 0,
+							middleMagneticField = 0,
+							outerMagneticField = 0;
+
+						toState.params.inner == "Inf" ? innerMagneticField = Infinity
+							: innerMagneticField = parseFloat(toState.params.inner);
+						toState.params.middle == "Inf" ? middleMagneticField = Infinity
+							: middleMagneticField = parseFloat(toState.params.middle);
+						toState.params.outer == "Inf" ? outerMagneticField = Infinity
+							: outerMagneticField = parseFloat(toState.params.outer);
+
+						var theta = math.bignumber(toState.params.theta) * (Math.PI / 180),
+							phi = math.bignumber(toState.params.phi) * (Math.PI / 180),
+							rad1 = math.abs(parseFloat(toState.params.rad1)),
+							rad2 = math.abs(parseFloat(toState.params.rad2)),
+							max = math.max(rad1, rad2),
+							iterations = parseInt(toState.params.iter),
+							param = 0,
+							steps = 0,
+							stop = 0,
+							iterX = [],
+							iterY = [],
+							// arrBirkX = [],
+							// arrBirkY = [],
+							coefficientList = [],
+							check = 0,
+							mass = 1,
+							charge = -1,
+							outerScaling = (charge * outerMagneticField) / mass,
+							middleScaling = (charge * middleMagneticField) / mass,
+							innerScaling = (charge * innerMagneticField) / mass;
+
+						var point = {
+							x: rad1 * math.cos(theta),
+							y: rad1 * math.sin(theta),
+							v_x: math.cos(phi),
+							v_y: math.sin(phi)
+						};
+
+						var scaleFactor = .5;
+						if(outerMagneticField != 0 && outerMagneticField != Infinity) {
+							scaleFactor *= (5 / math.abs(outerMagneticField));
+						}
+						else if(outerMagneticField == Infinity) {
+							scaleFactor = 1;
+						}
+
+						// Prefill the table with the current data
+						$("#variable1").val(rad1);
+						$("#variable2").val(rad2);
+						$("#variable4").val(middleMagneticField);
+						if(innerMagneticField == Infinity) {
+							$("#innerInf").attr("checked", true);
+							$("#variable3").val(null);
+						}
+						else {
+							$("#innerInf").attr("checked", false);
+							$("#variable3").val(innerMagneticField);
+						}
+						if(outerMagneticField == Infinity) {
+							$("#outerInf").attr("checked", true);
+							$("#variable5").val(null);
+						}
+						else {
+							$("#outerInf").attr("checked", false);
+							$("#variable5").val(outerMagneticField);
+						}
+						$("#variable6").val(toState.params.theta);
+						$("#variable7").val(toState.params.phi);
+						$("#variable8").val(toState.params.iter);
+						// Materialize.updateTextFields();
+
+						// Collecting Data
+
+						// Add starting point
+						iterX.push(point.x);
+						iterY.push(point.y);
+
+						// var funcArclength = function(t) {
+						// 	return math.sqrt((math.pow(a, 2) * math.pow(math.cos(t), 2)) +
+						// 		(math.pow(b, 2) * math.pow(math.sin(t), 2)));
+						// };
+
+						// console.log(point);
+
+						for(var i = 0; i < iterations; i++) {
+							// Inner Dynamics
+							if(innerMagneticField != Infinity) {
+								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+									point.x, point.y, point.v_x, point.v_y);
+								if(functions.checkRegionEllipse(check, rad1, rad1) == 1) {
+									point.v_x *= -1;
+									point.v_y *= -1;
+								}
+								if(innerMagneticField == 0) {
+									point = functions.plotting(point, rad1, rad1,
+										iterX, iterY, innerMagneticField, null,
+										middleMagneticField, scaleFactor, 0, "ellipse");
+								}
+								else {
+									point = functions.magneticPlotting(point, rad1, rad1,
+										iterX, iterY, innerScaling, innerMagneticField, null,
+										middleMagneticField, 0, "ellipse");
+								}
+							}
+
+							// Middle Dynamics
+							check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+								point.x, point.y, point.v_x, point.v_y);
+							if(functions.checkRegionAnnulus(check, rad1, rad2) == 1) {
+								point.v_x *= -1;
+								point.v_y *= -1;
+							}
+							if(middleMagneticField == 0) {
+								point = functions.plotting(point, rad1, rad2,
+									iterX, iterY, innerMagneticField,
+									middleMagneticField, outerMagneticField,
+									scaleFactor, 2, "annulus");
+							}
+							else {
+								point = functions.magneticPlottingAnnulus(point, rad1, rad2,
+									iterX, iterY, middleScaling);
+							}
+
+							// Outer Dynamics
+							if(functions.annulusBoundary(point, rad2) == 1) {
+								if(outerMagneticField != Infinity) {
+									check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+										point.x, point.y, point.v_x, point.v_y);
+									if(functions.checkRegionEllipse(check, rad2, rad2) == 0) {
+										point.v_x *= -1;
+										point.v_y *= -1;
+									}
+									if(outerMagneticField != 0) {
+										point = functions.magneticPlotting(point, rad2, rad2,
+											iterX, iterY, outerScaling, innerMagneticField,
+											null, outerMagneticField, 1, "ellipse");
+									}
+									else {
+										point = functions.plotting(point, rad2, rad2,
+											iterX, iterY, innerMagneticField, null,
+											outerMagneticField, scaleFactor, 1, "ellipse");
+									}
+								}
+							}
+
+							// Middle Dynamics
+							if(functions.annulusBoundary(point, rad2) == 1) {
+								check = functions.evaluateTrajectoryStep(math.pow(10, -2),
+									point.x, point.y, point.v_x, point.v_y);
+								if(functions.checkRegionAnnulus(check, rad1, rad2) == 1) {
+									point.v_x *= -1;
+									point.v_y *= -1;
+								}
+								if(middleMagneticField == 0) {
+									point = functions.plotting(point, rad1, rad2,
+										iterX, iterY, innerMagneticField,
+										middleMagneticField, outerMagneticField,
+										scaleFactor, 2, "annulus");
+								}
+								else {
+									point = functions.magneticPlottingAnnulus(point, rad1, rad2,
+										iterX, iterY, middleScaling);
+								}
+							}
+
+							// phi = math.acos(point.x / a);
+
+							// if(point.x == 0 && point.y == b) { phi = 0; }
+							// else if(point.x == 0 && point.y == -b) { phi = Math.PI; }
+							// else if(point.x < 0 && point.y < 0) {
+							// 	phi += 2 * (Math.PI - phi);
+							// }
+							// else if(point.x > 0 && point.y < 0) {
+							// 	phi = math.asin(point.y / b) + (2 * Math.PI);
+							// }
+
+							// arrBirkX.push(functions.riemannSum(funcArclength, 0, phi, math.pow(10, 4)));
+							// arrBirkY.push(functions.dotProduct({x: point.v_x, y: point.v_y},
+							// 	{x: -a * (point.y / b), y: b * (point.x / a)})
+							// 	/ math.sqrt(math.pow(a * (point.y / b), 2) + math.pow(b * (point.x / a), 2)));
+						}
+
+						// Plotting Data
+
+						var arrX = [],
+							arrY = [],
+							top = math.evaluate(2 * math.pi);
+
+						for(var i = 0; i < top; i += 0.01) {
+							arrX.push(rad1 * math.cos(i));
+							arrY.push(rad1 * math.sin(i));
+						}
+						arrX.push(null);
+						arrY.push(null);
+						for(var i = 0; i < top; i += 0.01) {
+							arrX.push(rad2 * math.cos(i));
+							arrY.push(rad2 * math.sin(i));
+						}
+
+						var trace1 = {
+						  	x: arrX,
+						  	y: arrY,
+						 	name: "Annulus",
+						  	type: "scatter"
+						};
+
+						var trace2 = {
+							x: iterX,
+							y: iterY,
+							name: "Trajectory",
+							type: "scatter",
+							mode: "lines",
+							connectgaps: false
+						};
+
+						// var trace3 = {
+						//   	x: arrBirkX,
+						//   	y: arrBirkY,
+						//  	name: "",
+						//  	mode: "markers",
+						//   	type: "scatter"
+						// };
+
+						var data = [trace1, trace2, {x: [], y: []}];
+							// dataBirk = [trace3];
+
+						if(iterations <= 200) {
+							var layout = {
+							  	grid: {rows: 1, columns: 1, pattern: "independent"},
+							  	showlegend: false,
+							  	xaxis: {
+							  		range: [-(max + scaleFactor), max + scaleFactor],
+							  		title: "$\\mathbf{x}_1-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+							  	},
+					  			yaxis: {
+					  				range: [-(max + scaleFactor), max + scaleFactor],
+					  				title: "$\\mathbf{x}_2-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+					  			},
+					  			title: "Particle Trajectory",
+					  			updatemenus: [{
+								      	x: 0,
+								      	y: 1,
+								      	yanchor: "bottom",
+								      	xanchor: "left",
+								      	showactive: false,
+								      	direction: "right",
+								      	type: "buttons",
+								      	pad: {b: 0, l: 180},
+								      	buttons: [{
+								        	method: "animate",
+								        	args: [null, {
+								          		mode: "immediate",
+								          		fromcurrent: true,
+								          		transition: {duration: 1},
+								          		frame: {duration: 100, redraw: false}
+						        			}
+					        			],
+								        label: "Play"
+							      	}, {
+									        method: 'animate',
+									        args: [[null], {
+									          	mode: "immediate",
+									          	transition: {duration: 0},
+									          	frame: {duration: 0, redraw: false}
+									        }
+							        	],
+								        label: "Pause"
+						      		}, {
+								        	method: "animate",
+								        	args: [null, {
+								          		mode: "immediate",
+								          		fromcurrent: false,
+								          		transition: {duration: 1},
+								          		frame: {duration: 100, redraw: false}
+								        	}
+							        	],
+								        label: "Restart"
+							      	}]
+					      		}]
+							};
+						}
+						else {
+							var layout = {
+							  	grid: {rows: 1, columns: 1, pattern: "independent"},
+							  	showlegend: false,
+							  	xaxis: {
+							  		range: [-(max + scaleFactor), max + scaleFactor],
+							  		title: "$\\mathbf{x}_1-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+							  	},
+					  			yaxis: {
+					  				range: [-(max + scaleFactor), max + scaleFactor],
+					  				title: "$\\mathbf{x}_2-\\text{axis}$",
+								    showticklabels: true,
+								    tickangle: "auto",
+								    exponentformat: "e",
+								    showexponent: "all"
+					  			},
+					  			title: "Particle Trajectory"
+							};
+						}
+
+
+						// var layoutBirk = {
+						//   	grid: {rows: 1, columns: 1, pattern: "independent"},
+						//   	showlegend: false,
+						//   	xaxis: {
+						//   		range: [0, 2.05 * Math.PI * max],
+						//   		title: "$\\text{Arc Length}$",
+						// 	    showticklabels: true,
+						// 	    tickangle: "auto",
+						// 	    exponentformat: "e",
+						// 	    showexponent: "all"
+						//   	},
+				  // 			yaxis: {
+				  // 				range: [-1.05, 1.05],
+				  // 				title: "$\\cos(\\varphi)$",
+						// 	    showticklabels: true,
+						// 	    tickangle: "auto",
+						// 	    exponentformat: "e",
+						// 	    showexponent: "all"
+				  // 			},
+				  // 			title: "Birkhoff Coordinates"
+						// };
+
+						$("#trajecPhoto").remove();
+						trajecPhoto = $("<div>").attr("id", "trajecPhoto").css({
+							"margin": "0 auto",
+							"width": "700px",
+							"height": "700px" 
+						});
+						main.append(trajecPhoto);
+						var count = 0;
+						Plotly.newPlot("trajecPhoto", data, layout, {scrollZoom: true, responsive: true})
+							.then(function() {
+								if(iterations <= 200) {
+									var container = [],
+										curX = [],
+										displayX = [],
+										curY = [],
+										displayY = [],
+										add = 0;
+									if(iterations < 100) {
+										add = parseInt(.01 * iterX.length);
+									}
+									else {
+										add = parseInt(.005 * iterX.length);
+									}
+									for(var i = 0; i < iterX.length; i += add) {
+										count++;
+										displayX = [];
+										displayY = [];
+										curX = iterX.slice(0, i);
+										curY = iterY.slice(0, i);
+										for(var j = 0; j < curX.length; j++) {
+											if(j % 100 == 0 || curX[j] == null || j == curX.length - 1) {
+												displayX.push(curX[j]);
+												displayY.push(curY[j]);
+											}
+										}
+										container.push({
+											data: [
+												{x: arrX, y: arrY},
+												{x: displayX, y: displayY},
+												{
+													x: [displayX[displayX.length - 1]],
+													y: [displayY[displayY.length - 1]],
+													mode: "markers",
+													marker: { size: 15, color: "black" }
+												}
+											],
+											name: "frame" + count
+										});
+									}
+									Plotly.addFrames("trajecPhoto", container);
+								}
+							});
+						$("#trajecPhoto").children().first().children().first().children().first().css({
+							"border-style": "solid",
+							"border-radius": "100px"
+						});
+
+						// $("#Birk").remove();
+						// birk = $("<div>").attr("id", "Birk").css({
+						// 	"margin": "0 auto",
+						// 	"width": "700px",
+						// 	"height": "700px",
+						// 	"padding-top": "30px"
+						// });
+						// main.append(birk);
+						// Plotly.newPlot("Birk", dataBirk, layoutBirk, {scrollZoom: true, responsive: true});
+						// $("#Birk").children().first().children().first().children().first().css({
+						// 	"border-style": "solid",
+						// 	"border-radius": "100px"
+						// });
+
+						$(".button-collapse").sideNav({ "menuWidth": "350px" });
+						main.css("margin-bottom", "60px");
+						functions.handle_links(router);
+						functions.config(router, "annulus");
+						$("select").material_select();
+						Materialize.updateTextFields();
+						MathJax.Hub.Queue(["Typeset", MathJax.Hub, "main"]);
+					});
+				});
+			});
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	};
 
 	return exports;

@@ -18,6 +18,9 @@ define(["jquery", "math"], ($, math) => {
 			else if(id == "changeRectangle") {
 				router.navigate("configRectangle");
 			}
+			else if(id == "changeAnnulus") {
+				router.navigate("configAnnulus");
+			}
 			else if(id == "mainMenu") {
 				exports.sideNavInitial(0, null);
 			}
@@ -123,6 +126,49 @@ define(["jquery", "math"], ($, math) => {
 						"fill in whatever data is missing and submit again.");
 				}
 			}
+			else if(table == "annulus") {
+				for(var i = 1; i < 9; i++) {
+					if(String($("#variable" + i).val()).length == 0) {
+						if(i == 3) {
+							if(!$("#innerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else if(i == 5) {
+							if(!$("#outerInf").is(":checked")) {
+								indicator = 0;
+							}
+						}
+						else {
+							indicator = 0;
+						}
+					}
+				}
+				if(parseInt($("#variable8").val()) < 1) { indicator = 0; }
+				if(indicator == 1) {
+					$("#innerInf").is(":checked") == true ? mag1 = "Inf"
+						: mag1 = $("#variable3").val();
+					$("#outerInf").is(":checked") == true ? mag2 = "Inf"
+						: mag2 = $("#variable5").val();
+					router.navigate("annulus", {
+						rad1: $("#variable1").val(),
+						rad2: $("#variable2").val(),
+						inner: mag1,
+						middle: $("#variable4").val(),
+						outer: mag2,
+						theta: $("#variable6").val(),
+						phi: $("#variable7").val(),
+						iter: $("#variable8").val(),
+					});
+				}
+				else if(parseInt($("#variable8").val()) < 1) {
+					alert("The number of iterations must be a positive integer!");
+				}
+				else {
+					alert("All of the requested information is necessary! Please " +
+						"fill in whatever data is missing and submit again.");
+				}
+			}
 		});
 	};
 
@@ -142,6 +188,9 @@ define(["jquery", "math"], ($, math) => {
 				),
 				$("<li>").addClass("no-padding").append(
 					$("<a>").attr("id", "changeRectangle").addClass("menuItems").text("Rectangular Table")
+				),
+				$("<li>").addClass("no-padding").append(
+					$("<a>").attr("id", "changeAnnulus").addClass("menuItems").text("Annular Table")
 				),
 				$("<li>").addClass("divider"),
 				$("<li>").addClass("no-padding").append(
@@ -281,6 +330,21 @@ define(["jquery", "math"], ($, math) => {
 
 
 
+	// Checks whether a given point is outside the annulus
+	exports.checkRegionAnnulus = function(info, innerRadius, outerRadius) {
+		return (math.pow(info.x / innerRadius, 2) + math.pow(info.y / innerRadius, 2) <= 1 ||
+			math.pow(info.x / outerRadius, 2) + math.pow(info.y / outerRadius, 2) > 1) ? 1 : 0;
+	};
+
+
+
+	// Checks whether a given point is near the boundary of an annulus
+	exports.annulusBoundary = function(info, radius) {
+		return math.abs(((math.pow(info.x / radius, 2) + math.pow(info.y / radius, 2)) - 1)) < math.pow(10, -3) ? 1 : 0;
+	};
+
+
+
 	// Checks whether a given point is outside the rectangle
 	exports.checkRegionRectangle = function(info, xLength, yLength, squeeze) {
 		var delta = 0;
@@ -293,7 +357,8 @@ define(["jquery", "math"], ($, math) => {
 
 
 	// Records the points attained along a non-magnetic trajectory inside the ellipse
-	exports.plotting = function(point, xLength, yLength, iterX, iterY, innerMagneticField, outerMagneticField, scale, ver, table) {
+	exports.plotting = function(point, xLength, yLength, iterX, iterY,
+		innerMagneticField, middleMagneticField, outerMagneticField, scale, ver, table) {
 		if(ver == 0) {
 			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
 				point.x, point.y, point.v_x, point.v_y);
@@ -439,13 +504,41 @@ define(["jquery", "math"], ($, math) => {
 				}
 			}
 		}
+		else if(ver == 2) {
+			var check = exports.evaluateTrajectoryStep(math.pow(10, -2),
+				point.x, point.y, point.v_x, point.v_y);
+			if(table == "annulus") {
+				if(exports.checkRegionAnnulus(check, xLength, yLength) == 0) {
+					check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+							point.x, point.y, point.v_x, point.v_y);
+					iterX.push(check.x);
+					iterY.push(check.y);
+					while(exports.checkRegionAnnulus(check, xLength, yLength) == 0) {
+						check = exports.evaluateTrajectoryStep(math.pow(10, -4),
+							check.x, check.y, check.v_x, check.v_y);
+						iterX.push(check.x);
+						iterY.push(check.y);
+					}
+				}
+				if(outerMagneticField == Infinity) {
+					point = exports.evaluateTrajectory(point.x, point.y,
+						point.v_x, point.v_y, xLength, yLength);
+					iterX.push(point.x);
+					iterY.push(point.y);
+					point = exports.reflectTrajectoryEllipse(point.x, point.y,
+						point.v_x, point.v_y, xLength, yLength);
+				}
+				else { point = check; }
+			}
+		}
 		return point;
 	};
 
 
 
 	// Records the points attained along a magnetic trajectory in the plane
-	exports.magneticPlotting = function(point, xLength, yLength, iterX, iterY, scaling, innerMagneticField, outerMagneticField, ver, table) {
+	exports.magneticPlotting = function(point, xLength, yLength, iterX, iterY, scaling,
+		innerMagneticField, middleMagneticField, outerMagneticField, ver, table) {
 		var coefficientList = [point.x, point.v_x, point.y, point.v_y],
 			param = 0,
 			steps = 0,
@@ -538,6 +631,64 @@ define(["jquery", "math"], ($, math) => {
 				point = exports.reflectTrajectoryRectangle(point.x, point.y,
 					point.v_x, point.v_y, xLength, yLength);
 			}
+		}
+		return point;
+	};
+
+
+
+	// Records the points attained along a magnetic trajectory in the plane
+	exports.magneticPlottingAnnulus = function(point, innerRadius, outerRadius, iterX, iterY, scaling,
+		innerMagneticField, middleMagneticField, outerMagneticField) {
+		var coefficientList = [point.x, point.v_x, point.y, point.v_y],
+			param = 0,
+			steps = 0,
+			index = 0,
+			sum = 0,
+			bound = math.pow(10, 6),
+			index = math.pow(10, -3.6),
+			// index = math.pow(10, -3.697),
+			indexArr = [math.pow(10, -2.5), math.pow(10, -3.2), 
+				math.pow(10, -3.8), math.pow(10, -4.5), math.pow(10, -3.5)];
+		for(var i = 0; i < 5; i++) {
+			var check = exports.evaluateMagneticTrajectory(indexArr[i],
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling);
+			if(exports.checkRegionAnnulus(check, innerRadius, outerRadius) == 0) { sum++; }
+		}
+		if(sum > 1) {
+			point = check;
+			while(exports.checkRegionAnnulus(point, innerRadius, outerRadius) == 0) {
+				if(steps >= bound) { break; }
+				else { steps++; }
+				param += index;
+				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+				iterX.push(point.x);
+				iterY.push(point.y);
+			}
+		}
+		else {
+			point = exports.evaluateMagneticTrajectory(-indexArr[4],
+				coefficientList[0], coefficientList[1], coefficientList[2],
+				coefficientList[3], scaling);
+			while(exports.checkRegionAnnulus(point, innerRadius, outerRadius) == 0) {
+				if(steps >= bound) { break; }
+				else { steps++; }
+				param -= index;
+				point = exports.evaluateMagneticTrajectory(param, coefficientList[0],
+					coefficientList[1], coefficientList[2], coefficientList[3], scaling);
+				iterX.push(point.x);
+				iterY.push(point.y);
+			}
+		}
+		if(outerMagneticField == Infinity && exports.annulusBoundary(point, outerRadius)) {
+			point = exports.reflectTrajectoryEllipse(point.x, point.y,
+				point.v_x, point.v_y, outerRadius, outerRadius);
+		}
+		if(innerMagneticField == Infinity && exports.annulusBoundary(point, innerRadius)) {
+			point = exports.reflectTrajectoryEllipse(point.x, point.y,
+				point.v_x, point.v_y, innerRadius, innerRadius);
 		}
 		return point;
 	};
