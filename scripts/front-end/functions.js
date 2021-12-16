@@ -545,7 +545,7 @@ define(["jquery", "math"], ($, math) => {
 			index = 0,
 			sum = 0,
 			bound = math.pow(10, 6),
-			index = math.pow(10, -3.6),
+			index = math.pow(10, -3.5),
 			// index = math.pow(10, -3.697),
 			indexArr = [math.pow(10, -2.5), math.pow(10, -3.2), 
 				math.pow(10, -3.8), math.pow(10, -4.5), math.pow(10, -3.5)];
@@ -560,6 +560,7 @@ define(["jquery", "math"], ($, math) => {
 				if(exports.checkRegionRectangle(check, xLength, yLength) == ver) { sum++; }
 			}
 		}
+		console.log(sum);
 		if(sum > 1) {
 			point = check;
 			if(table == "ellipse") {
@@ -699,12 +700,24 @@ define(["jquery", "math"], ($, math) => {
 	exports.riemannSum = function(func, a, b, n) {
 		var delta = (b - a) / n,
 			x = 0,
-			sum = 0;
-		for(var i = 0; i < n; i++) {
+			leftSum = 0,
+			rightSum = 0;
+		for(var i = 0; i < n + 1; i++) {
 			x = a + (delta * i);
-			sum += func(x);
+			if(i == 0) {
+				leftSum += func(x);
+			}
+			else if(i == n) {
+				rightSum += func(x);
+			}
+			else {
+				leftSum += func(x);
+				rightSum += func(x);
+			}
 		}
-		return sum * delta;
+		leftSum *= delta;
+		rightSum *= delta;
+		return (leftSum + rightSum) / 2;
 	};
 
 	return exports;
